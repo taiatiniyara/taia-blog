@@ -26,7 +26,7 @@ export default async function SeriesDetailPage({ params }: Props) {
   if (posts.length === 0) notFound()
 
   return (
-    <div>
+    <PageWrapper>
       <h1 className="text-xl font-semibold mb-2">{decoded}</h1>
       <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
         {posts.length} post{posts.length !== 1 ? "s" : ""} in this series
@@ -37,8 +37,7 @@ export default async function SeriesDetailPage({ params }: Props) {
             <span className="text-sm text-neutral-400 dark:text-neutral-500 font-mono tabular-nums w-6 shrink-0">
               {i + 1}.
             </span>
-    <PageWrapper>
-      <div>
+            <div>
               <Link
                 href={`/blog/${post.slug}`}
                 className="text-neutral-900 dark:text-neutral-100 hover:text-neutral-600 dark:hover:text-neutral-400"
@@ -48,12 +47,11 @@ export default async function SeriesDetailPage({ params }: Props) {
               <span className="text-sm text-neutral-500 dark:text-neutral-400 ml-2">
                 {formatDate(post.createdAt)}
               </span>
-      </div>
-    </PageWrapper>
+            </div>
           </li>
         ))}
       </ol>
-    </div>
+    </PageWrapper>
   )
 }
 

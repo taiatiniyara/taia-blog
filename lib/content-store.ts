@@ -18,6 +18,5 @@ export async function loadContent(slug: string): Promise<Record<string, unknown>
 }
 
 export async function deleteContent(_slug: string): Promise<void> {
-  // R2 objects can be overwritten or left for lifecycle policies.
-  // The post's deletedAt in SQLite handles the soft delete.
+  void _slug
 }

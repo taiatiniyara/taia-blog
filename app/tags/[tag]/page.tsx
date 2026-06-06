@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { LuChevronRight } from "react-icons/lu"
 import { PostList } from "@/components/post-list"
 import { PageWrapper } from "@/components/page-wrapper"
 
@@ -31,9 +32,9 @@ export default async function TagPage({
           <div className="mt-8 text-center">
             <Link
               href={`/tags/${encodeURIComponent(tag)}?page=${page + 1}`}
-              className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+              className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 inline-flex items-center gap-1"
             >
-              Older Posts &rarr;
+              Older Posts <LuChevronRight size={14} />
             </Link>
           </div>
         )}

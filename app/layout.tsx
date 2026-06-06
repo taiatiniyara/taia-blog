@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
+import { headers } from "next/headers"
 import { Geist, Geist_Mono, Source_Serif_4 } from "next/font/google"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { ThemeToggle } from "@/components/theme-toggle"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -39,13 +39,13 @@ export const metadata: Metadata = {
     siteName: "Taia's Blog",
     title: "Taia's Blog",
     description: "Personal thoughts on things in general.",
-    images: [`${baseUrl}/og-image.png`],
+    images: [`${baseUrl}/og-image.svg`],
   },
   twitter: {
     card: "summary_large_image",
     title: "Taia's Blog",
     description: "Personal thoughts on things in general.",
-    images: [`${baseUrl}/og-image.png`],
+    images: [`${baseUrl}/og-image.svg`],
   },
   robots: {
     index: true,
@@ -53,14 +53,20 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const heads = await headers()
+  const pathname = heads.get("x-pathname") ?? ""
+  const isAdmin = pathname.startsWith("/admin")
+
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${sourceSerif4.variable}`}>
       <head>
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -79,14 +85,17 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col font-sans">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-neutral-900 dark:focus:bg-neutral-100 focus:text-white dark:focus:text-neutral-900 focus:rounded-lg"
+        >
+          Skip to content
+        </a>
         <Header />
-        <main className="flex-1 px-4 py-8">
+        <main className="flex-1 px-4 py-8" id="main-content">
           {children}
         </main>
-        <Footer />
-        <div className="fixed bottom-4 right-4 z-50">
-          <ThemeToggle />
-        </div>
+        {!isAdmin && <Footer />}
       </body>
     </html>
   )

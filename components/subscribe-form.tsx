@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
+import { LuMail } from "react-icons/lu"
 import { subscribe } from "@/lib/actions"
 
 export function SubscribeForm() {
@@ -29,13 +30,16 @@ export function SubscribeForm() {
   return (
     <div>
       <form ref={formRef} action={handleSubmit} className="flex gap-2 max-w-sm">
-        <input
-          type="email"
-          name="email"
-          required
-          placeholder="your@email.com"
-          className="flex-1 px-3 py-2 text-sm border rounded-lg bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 placeholder:text-neutral-400"
-        />
+        <div className="flex-1 relative">
+          <LuMail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+          <input
+            type="email"
+            name="email"
+            required
+            placeholder="your@email.com"
+            className="w-full pl-8 pr-3 py-2 text-sm border rounded-lg bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 placeholder:text-neutral-400"
+          />
+        </div>
         <button
           type="submit"
           disabled={status === "loading"}

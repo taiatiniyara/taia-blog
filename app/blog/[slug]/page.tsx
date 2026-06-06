@@ -6,6 +6,7 @@ import { loadContent } from "@/lib/content-store"
 import { renderTiptapJSON } from "@/lib/tiptap-renderer"
 import { getSeriesPosts } from "@/lib/posts"
 import Link from "next/link"
+import { LuChevronLeft, LuChevronRight, LuCalendar, LuList } from "react-icons/lu"
 import type { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = extractDescription(content, post.title)
 
   const baseUrl = process.env.SITE_URL ?? "http://localhost:3000"
-  const ogImage = `${baseUrl}/og-image.png`
+  const ogImage = `${baseUrl}/og-image.svg`
 
   return {
     title: post.title,
@@ -124,6 +125,7 @@ export default async function PostPage({ params, searchParams }: Props) {
         )}
         <h1 className="text-2xl sm:text-3xl font-bold leading-tight">{post.title}</h1>
         <div className="mt-3 flex items-center gap-3 text-sm text-neutral-500 dark:text-neutral-400">
+          <LuCalendar size={14} />
           <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
         </div>
         {tags.length > 0 && (
@@ -159,7 +161,8 @@ export default async function PostPage({ params, searchParams }: Props) {
     {sidebarPosts.length > 0 && (
       <aside className="mt-10 lg:mt-0 lg:block">
         <div className="lg:sticky lg:top-8">
-          <h3 className="text-sm font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wide mb-4">
+          <h3 className="text-sm font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wide mb-4 inline-flex items-center gap-1.5">
+            <LuList size={14} />
             Recent Posts
           </h3>
           <ul className="space-y-3">
@@ -225,9 +228,9 @@ async function SeriesNav({
           {previous ? (
             <Link
               href={`/blog/${previous.slug}`}
-              className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 max-w-[48%] truncate"
+              className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 max-w-[48%] truncate inline-flex items-center gap-1"
             >
-              &larr; {previous.title}
+              <LuChevronLeft size={14} className="shrink-0" /> {previous.title}
             </Link>
           ) : (
             <span />
@@ -235,9 +238,9 @@ async function SeriesNav({
           {next && (
             <Link
               href={`/blog/${next.slug}`}
-              className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 text-right max-w-[48%] truncate"
+              className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 text-right max-w-[48%] truncate inline-flex items-center gap-1"
             >
-              {next.title} &rarr;
+              {next.title} <LuChevronRight size={14} className="shrink-0" />
             </Link>
           )}
         </div>

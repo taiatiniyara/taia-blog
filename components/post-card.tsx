@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { LuTag } from "react-icons/lu"
 import type { Post } from "@/lib/posts"
 import { formatDate } from "@/lib/format-date"
 
@@ -36,8 +37,9 @@ export function PostCard({
             <Link
               key={tag}
               href={`/tags/${encodeURIComponent(tag)}`}
-              className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+              className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 inline-flex items-center gap-1"
             >
+              <LuTag size={10} />
               {tag}
             </Link>
           ))}

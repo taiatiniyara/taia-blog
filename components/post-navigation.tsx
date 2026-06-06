@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 
 type AdjacentPost = { slug: string; title: string } | null
 
@@ -30,7 +31,7 @@ export function PostNavigation({
             href={`/blog/${previous.slug}`}
             className="group text-xs sm:text-sm"
           >
-            <span className="text-neutral-400 dark:text-neutral-500">&larr; Older</span>
+            <span className="text-neutral-400 dark:text-neutral-500 inline-flex items-center gap-1"><LuChevronLeft size={14} /> Older</span>
             <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100 leading-snug">
               <TruncatedTitle title={previous.title} />
             </span>
@@ -43,7 +44,7 @@ export function PostNavigation({
             href={`/blog/${next.slug}`}
             className="group text-xs sm:text-sm"
           >
-            <span className="text-neutral-400 dark:text-neutral-500">Newer &rarr;</span>
+            <span className="text-neutral-400 dark:text-neutral-500 inline-flex items-center gap-1">Newer <LuChevronRight size={14} /></span>
             <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100 leading-snug">
               <TruncatedTitle title={next.title} />
             </span>

@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { LuRss } from "react-icons/lu"
 import { SubscribeForm } from "./subscribe-form"
 
 export function Footer() {
@@ -18,7 +19,8 @@ export function Footer() {
         </div>
         <div className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 flex items-center justify-between pt-4 border-t border-neutral-100 dark:border-neutral-800">
           <span>&copy; {year} Taia&apos;s Blog</span>
-          <Link href="/feed.xml" className="hover:text-neutral-800 dark:hover:text-neutral-200">
+          <Link href="/feed.xml" className="hover:text-neutral-800 dark:hover:text-neutral-200 inline-flex items-center gap-1">
+            <LuRss size={14} />
             RSS
           </Link>
         </div>

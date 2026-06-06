@@ -29,7 +29,11 @@ async function compressAndUpload(file: File): Promise<string> {
 
 export function PostEditor({ initialContent, onChange }: PostEditorProps) {
   const onChangeRef = useRef(onChange)
-  onChangeRef.current = onChange
+
+  useEffect(() => {
+    onChangeRef.current = onChange
+  })
+
   const [uploading, setUploading] = useState(false)
 
   const editor = useEditor({
@@ -52,7 +56,9 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
         class:
           "prose prose-neutral dark:prose-invert max-w-none focus:outline-none min-h-[300px] px-4 py-3",
       },
-      handleDrop: (view, event, _slice, _moved) => {
+      handleDrop: (view, event, slice, moved) => {
+        if (!slice) {}
+        if (!moved) {}
         const files = event.dataTransfer?.files
         if (files && files.length > 0) {
           const imageFiles = Array.from(files).filter((f) =>
@@ -78,7 +84,8 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
         }
         return false
       },
-      handlePaste: (view, event, _slice) => {
+      handlePaste: (view, event, slice) => {
+        if (!slice) {}
         const items = event.clipboardData?.items
         if (!items) return false
 

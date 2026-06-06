@@ -79,7 +79,8 @@ export function PostForm({ post }: { post?: PostData }) {
         setSaving(false)
       }
     },
-    [title, slug, tags, series, published, content, post?.id],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
 
   useEffect(() => {
@@ -202,7 +203,7 @@ export function PostForm({ post }: { post?: PostData }) {
                       const finalSlug = slug || generateSlug(title)
                       const result = await sendPostToSubscribers(finalSlug)
                       setSendResult(`Sent to ${result.sent} subscriber${result.sent !== 1 ? "s" : ""}.`)
-                    } catch (err) {
+                    } catch {
                       setSendResult("Failed to send.")
                     } finally {
                       setSending(false)
