@@ -1,0 +1,44 @@
+import Link from "next/link"
+
+type AdjacentPost = { slug: string; title: string } | null
+
+export function PostNavigation({
+  previous,
+  next,
+}: {
+  previous: AdjacentPost
+  next: AdjacentPost
+}) {
+  if (!previous && !next) return null
+
+  return (
+    <nav className="mt-12 pt-6 border-t border-neutral-200 dark:border-neutral-800 grid grid-cols-2 gap-4">
+      <div>
+        {previous && (
+          <Link
+            href={`/blog/${previous.slug}`}
+            className="group text-sm"
+          >
+            <span className="text-neutral-400 dark:text-neutral-500">&larr; Older</span>
+            <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100">
+              {previous.title}
+            </span>
+          </Link>
+        )}
+      </div>
+      <div className="text-right">
+        {next && (
+          <Link
+            href={`/blog/${next.slug}`}
+            className="group text-sm"
+          >
+            <span className="text-neutral-400 dark:text-neutral-500">Newer &rarr;</span>
+            <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100">
+              {next.title}
+            </span>
+          </Link>
+        )}
+      </div>
+    </nav>
+  )
+}
