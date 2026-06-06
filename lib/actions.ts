@@ -9,6 +9,7 @@ import { uploadToR2 } from "@/lib/r2-client"
 import { auth } from "@/lib/auth"
 import { sendEmail, isEmailConfigured } from "@/lib/email"
 import { postEmailTemplate } from "@/lib/email-template"
+import sharp from "sharp"
 
 async function requireAuth() {
   const session = await auth()
@@ -162,11 +163,13 @@ export async function uploadImage(formData: FormData): Promise<string> {
   const file = formData.get("file") as File | null
   if (!file) throw new Error("No file provided")
 
-  const ext = file.name.split(".").pop()?.toLowerCase() ?? "webp"
-  const key = `images/${crypto.randomUUID()}.${ext}`
   const buffer = Buffer.from(await file.arrayBuffer())
+  const webpBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer()
 
-  const url = await uploadToR2(key, buffer, file.type || "image/webp")
+  const key = `images/${crypto.randomUUID()}.webp`
+  const url = await uploadToR2(key, webpBuffer, "image/webp")
+
+  console.error("[uploadImage] %s (%d→%d bytes) → %s", file.name, file.size, webpBuffer.length, url)
   return url
 }
 

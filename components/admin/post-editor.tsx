@@ -6,7 +6,6 @@ import ImageExtension from "@tiptap/extension-image"
 import Typography from "@tiptap/extension-typography"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { uploadImage } from "@/lib/actions"
-import imageCompression from "browser-image-compression"
 
 type PostEditorProps = {
   initialContent?: Record<string, unknown>
@@ -14,14 +13,8 @@ type PostEditorProps = {
 }
 
 async function compressAndUpload(file: File): Promise<string> {
-  const compressed = await imageCompression(file, {
-    maxSizeMB: 0.5,
-    maxWidthOrHeight: 1200,
-    useWebWorker: false,
-  })
-
   const formData = new FormData()
-  formData.set("file", compressed)
+  formData.set("file", file)
   return await uploadImage(formData)
 }
 
