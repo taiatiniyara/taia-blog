@@ -1,17 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useSyncExternalStore } from "react"
 import { LuSun, LuMoon } from "react-icons/lu"
 
-export function ThemeToggle() {
-  const [dark, setDark] = useState(() => {
-    if (typeof window === "undefined") return false
-    return document.documentElement.classList.contains("dark")
+function getSnapshot() {
+  return document.documentElement.classList.contains("dark")
+}
+
+function getServerSnapshot() {
+  return false
+}
+
+function subscribe(onStoreChange: () => void) {
+  const observer = new MutationObserver(onStoreChange)
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
   })
+  return () => observer.disconnect()
+}
+
+export function ThemeToggle() {
+  const dark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
   function toggle() {
     const next = !dark
-    setDark(next)
     document.documentElement.classList.toggle("dark", next)
     document.cookie = `theme=${next ? "dark" : "light"}; path=/; max-age=31536000`
   }
