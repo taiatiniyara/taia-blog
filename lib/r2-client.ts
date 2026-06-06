@@ -30,8 +30,7 @@ function getClient(): S3Client {
 
 export async function uploadToR2(key: string, body: Buffer | Uint8Array | Blob, contentType: string): Promise<string> {
   if (!isConfigured()) {
-    console.warn(`[r2] Not configured, skipping upload: ${key}`)
-    return `${process.env.R2_PUBLIC_URL ?? ""}/${key}`
+    throw new Error(`R2 not configured — cannot upload ${key}`)
   }
   const client = getClient()
   const upload = new Upload({

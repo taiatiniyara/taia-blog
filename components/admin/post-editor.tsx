@@ -17,8 +17,7 @@ async function compressAndUpload(file: File): Promise<string> {
   const compressed = await imageCompression(file, {
     maxSizeMB: 0.5,
     maxWidthOrHeight: 1200,
-    useWebWorker: true,
-    fileType: "image/webp",
+    useWebWorker: false,
   })
 
   const formData = new FormData()
@@ -34,6 +33,7 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
   })
 
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -57,8 +57,8 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
           "prose prose-neutral dark:prose-invert max-w-none focus:outline-none min-h-[300px] px-4 py-3",
       },
       handleDrop: (view, event, slice, moved) => {
-        if (!slice) {}
-        if (!moved) {}
+        void slice
+        void moved
         const files = event.dataTransfer?.files
         if (files && files.length > 0) {
           const imageFiles = Array.from(files).filter((f) =>
@@ -67,6 +67,7 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
           if (imageFiles.length > 0) {
             event.preventDefault()
             setUploading(true)
+            setUploadError(null)
             Promise.all(imageFiles.map(compressAndUpload))
               .then((urls) => {
                 urls.forEach((url) => {
@@ -77,7 +78,9 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
                   )
                 })
               })
-              .catch(console.error)
+              .catch((err) => {
+                setUploadError(err instanceof Error ? err.message : "Image upload failed")
+              })
               .finally(() => setUploading(false))
             return true
           }
@@ -85,7 +88,7 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
         return false
       },
       handlePaste: (view, event, slice) => {
-        if (!slice) {}
+        void slice
         const items = event.clipboardData?.items
         if (!items) return false
 
@@ -99,6 +102,7 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
         if (imageItems.length > 0) {
           event.preventDefault()
           setUploading(true)
+          setUploadError(null)
           const files = imageItems.map((item) => item.getAsFile()).filter(Boolean) as File[]
           Promise.all(files.map(compressAndUpload))
             .then((urls) => {
@@ -110,7 +114,9 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
                 )
               })
             })
-            .catch(console.error)
+            .catch((err) => {
+              setUploadError(err instanceof Error ? err.message : "Image upload failed")
+            })
             .finally(() => setUploading(false))
           return true
         }
@@ -272,8 +278,12 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
           label="Insert image"
         >
           Img
-        </ToolbarButton>        {uploading && (
+        </ToolbarButton>
+        {uploading && (
           <span className="ml-2 text-xs text-neutral-400">Uploading...</span>
+        )}
+        {uploadError && (
+          <span className="ml-2 text-xs text-red-500">{uploadError}</span>
         )}
       </div>
       <EditorContent editor={editor} />
