@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import { PostEditor } from "./post-editor"
-import { savePost, deletePost, getPreviewUrl } from "@/lib/actions"
+import { savePost, deletePost, getPreviewUrl, sendPostToSubscribers } from "@/lib/actions"
 import { useRouter } from "next/navigation"
 
 type PostData = {
@@ -36,6 +36,8 @@ export function PostForm({ post }: { post?: PostData }) {
     post?.content ?? null,
   )
   const [saving, setSaving] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sendResult, setSendResult] = useState<string | null>(null)
   const slugManualRef = useRef(false)
 
   useEffect(() => {
@@ -181,13 +183,40 @@ export function PostForm({ post }: { post?: PostData }) {
       <div className="flex items-center justify-between pt-4 border-t">
         <div>
           {!isNew && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg"
-            >
-              Delete
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg"
+              >
+                Delete
+              </button>
+              {published && (
+                <button
+                  type="button"
+                  disabled={sending}
+                  onClick={async () => {
+                    setSending(true)
+                    setSendResult(null)
+                    try {
+                      const finalSlug = slug || generateSlug(title)
+                      const result = await sendPostToSubscribers(finalSlug)
+                      setSendResult(`Sent to ${result.sent} subscriber${result.sent !== 1 ? "s" : ""}.`)
+                    } catch (err) {
+                      setSendResult("Failed to send.")
+                    } finally {
+                      setSending(false)
+                    }
+                  }}
+                  className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg"
+                >
+                  {sending ? "Sending..." : "Send to subscribers"}
+                </button>
+              )}
+              {sendResult && (
+                <span className="text-xs text-neutral-500">{sendResult}</span>
+              )}
+            </div>
           )}
         </div>
         <div className="flex items-center gap-3">

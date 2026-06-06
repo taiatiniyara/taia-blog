@@ -1,12 +1,14 @@
 "use server"
 
 import { db } from "@/db/client"
-import { posts } from "@/db/schema"
-import { eq, isNull, desc } from "drizzle-orm"
+import { posts, subscribers } from "@/db/schema"
+import { eq, isNull, desc, and } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
-import { saveContent } from "@/lib/content-store"
+import { saveContent, loadContent } from "@/lib/content-store"
 import { uploadToR2 } from "@/lib/r2-client"
 import { auth } from "@/lib/auth"
+import { sendEmail, isEmailConfigured } from "@/lib/email"
+import { postEmailTemplate } from "@/lib/email-template"
 
 async function requireAuth() {
   const session = await auth()
@@ -137,4 +139,158 @@ export async function getPreviewUrl(slug: string): Promise<string> {
   const token = process.env.PREVIEW_TOKEN ?? ""
   const siteUrl = process.env.SITE_URL ?? "http://localhost:3000"
   return `${siteUrl}/blog/${slug}?preview=${token}`
+}
+
+export async function subscribe(formData: FormData) {
+  const email = (formData.get("email") as string)?.trim().toLowerCase()
+  if (!email || !email.includes("@")) {
+    throw new Error("Valid email required")
+  }
+
+  const existing = await db
+    .select()
+    .from(subscribers)
+    .where(eq(subscribers.email, email))
+    .get()
+
+  if (existing && existing.confirmed && !existing.unsubscribedAt) {
+    return { status: "already_subscribed" as const }
+  }
+
+  const token = crypto.randomUUID()
+  const now = new Date().toISOString()
+
+  if (existing) {
+    await db
+      .update(subscribers)
+      .set({ token, confirmed: 0, unsubscribedAt: null, createdAt: now })
+      .where(eq(subscribers.email, email))
+      .run()
+  } else {
+    await db
+      .insert(subscribers)
+      .values({ email, token, createdAt: now })
+      .run()
+  }
+
+  const siteUrl = process.env.SITE_URL ?? "http://localhost:3000"
+  const confirmUrl = `${siteUrl}/subscribe/confirm?token=${token}`
+
+  await sendEmail({
+    to: email,
+    subject: "Confirm your subscription — Taia's Blog",
+    html: `<!DOCTYPE html>
+<html>
+<body style="font-family:Georgia,serif;max-width:480px;margin:40px auto;color:#171717;">
+  <p style="font-size:14px;color:#6b7280;">Taia's Blog</p>
+  <h1 style="font-size:22px;margin:8px 0;">Confirm your subscription</h1>
+  <p style="font-size:15px;line-height:1.6;color:#374151;">Click the button below to confirm you want to receive new posts by email.</p>
+  <a href="${confirmUrl}" style="display:inline-block;padding:10px 24px;background:#171717;color:white;text-decoration:none;border-radius:6px;font-size:14px;margin-top:8px;">Confirm subscription</a>
+  <p style="font-size:13px;color:#6b7280;margin-top:24px;">If you didn't request this, you can ignore this email.</p>
+</body>
+</html>`,
+  })
+
+  return { status: "confirmation_sent" as const }
+}
+
+export async function confirmSubscription(token: string) {
+  const sub = await db
+    .select()
+    .from(subscribers)
+    .where(eq(subscribers.token, token))
+    .get()
+
+  if (!sub) throw new Error("Invalid confirmation token")
+
+  await db
+    .update(subscribers)
+    .set({ confirmed: 1 })
+    .where(eq(subscribers.id, sub.id))
+    .run()
+
+  return { email: sub.email }
+}
+
+export async function unsubscribe(token: string) {
+  const sub = await db
+    .select()
+    .from(subscribers)
+    .where(eq(subscribers.token, token))
+    .get()
+
+  if (!sub) throw new Error("Invalid token")
+
+  await db
+    .update(subscribers)
+    .set({ unsubscribedAt: new Date().toISOString() })
+    .where(eq(subscribers.id, sub.id))
+    .run()
+}
+
+export async function sendPostToSubscribers(slug: string) {
+  await requireAuth()
+
+  if (!isEmailConfigured()) {
+    throw new Error("SMTP not configured")
+  }
+
+  const post = await db
+    .select()
+    .from(posts)
+    .where(and(eq(posts.slug, slug), isNull(posts.deletedAt)))
+    .get()
+
+  if (!post) throw new Error("Post not found")
+
+  const content = await loadContent(slug)
+  const excerpt = extractEmailExcerpt(content)
+
+  const subs = await db
+    .select()
+    .from(subscribers)
+    .where(and(eq(subscribers.confirmed, 1), isNull(subscribers.unsubscribedAt)))
+    .all()
+
+  if (subs.length === 0) throw new Error("No confirmed subscribers")
+
+  const siteUrl = process.env.SITE_URL ?? "http://localhost:3000"
+  let sent = 0
+  let failed = 0
+
+  for (const sub of subs) {
+    const html = postEmailTemplate({
+      title: post.title,
+      slug: post.slug,
+      excerpt: excerpt || post.title,
+      date: post.createdAt,
+      unsubscribeUrl: `${siteUrl}/subscribe/unsubscribe?token=${sub.token}`,
+    })
+    const ok = await sendEmail({
+      to: sub.email,
+      subject: post.title,
+      html,
+    })
+    if (ok) sent++
+    else failed++
+  }
+
+  return { sent, failed, total: subs.length }
+}
+
+function extractEmailExcerpt(
+  content: Record<string, unknown> | null,
+): string {
+  if (!content) return ""
+  const walk = (node: unknown): string => {
+    if (typeof node === "string") return node
+    if (Array.isArray(node)) return node.map(walk).join(" ")
+    if (node && typeof node === "object" && "text" in node)
+      return String((node as Record<string, unknown>).text)
+    if (node && typeof node === "object" && "content" in node)
+      return walk((node as Record<string, unknown>).content)
+    return ""
+  }
+  const text = walk(content)
+  return text.replace(/\s+/g, " ").trim().slice(0, 280).replace(/\s+\S*$/, "") || ""
 }

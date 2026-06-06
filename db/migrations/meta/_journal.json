@@ -15,6 +15,13 @@
       "when": 1780771626300,
       "tag": "0001_yummy_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1780779920303,
+      "tag": "0002_heavy_strong_guy",
+      "breakpoints": true
     }
   ]
 }
