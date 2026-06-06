@@ -2,23 +2,23 @@ import Link from "next/link"
 import type { Post } from "@/lib/posts"
 import { formatDate } from "@/lib/format-date"
 
-export function PostCard({ post, compact = false }: { post: Post; compact?: boolean }) {
+export function PostHero({ post }: { post: Post }) {
   const tags = post.tags
     ? post.tags.split(",").map((t) => t.trim()).filter(Boolean)
     : []
 
   return (
-    <article className={compact ? "" : "py-6 border-b border-neutral-100 dark:border-neutral-800 first:pt-0 last:border-0"}>
+    <article className="pb-10 border-b border-neutral-200 dark:border-neutral-800">
       <Link href={`/blog/${post.slug}`} className="group">
-        <h2 className="text-lg font-semibold leading-snug group-hover:text-neutral-600 dark:group-hover:text-neutral-400">
+        <h1 className="text-2xl sm:text-3xl font-bold leading-tight group-hover:text-neutral-600 dark:group-hover:text-neutral-400">
           {post.title}
-        </h2>
+        </h1>
       </Link>
-      <div className="mt-1 flex items-center gap-3 text-sm text-neutral-500 dark:text-neutral-400">
+      <div className="mt-3 flex items-center gap-3 text-sm text-neutral-500 dark:text-neutral-400">
         <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
       </div>
       {tags.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           {tags.map((tag) => (
             <Link
               key={tag}

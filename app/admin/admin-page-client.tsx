@@ -79,12 +79,12 @@ export function AdminPageClient({
       </div>
 
       {posts.length === 0 ? (
-        <p className="text-neutral-500 dark:text-neutral-400 py-8 text-center">
+        <p className="text-neutral-500 dark:text-neutral-400 py-8 text-center text-sm">
           No posts yet.
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto -mx-4 px-4">
+          <table className="w-full text-xs sm:text-sm">
             <thead>
               <tr className="border-b text-left text-neutral-500 dark:text-neutral-400">
                 <th className="py-2 pr-4 font-medium">Title</th>

@@ -6,7 +6,7 @@ export default async function SeriesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-6">Series</h1>
+      <h1 className="text-xl sm:text-2xl font-semibold mb-6">Series</h1>
       {seriesList.length === 0 ? (
         <p className="text-neutral-500 dark:text-neutral-400">No series yet.</p>
       ) : (

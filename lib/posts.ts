@@ -1,18 +1,19 @@
 import { db } from "@/db/client"
 import { posts } from "@/db/schema"
-import { eq, and, isNull, like, sql, desc } from "drizzle-orm"
+import { eq, and, isNull, like, sql, desc, asc } from "drizzle-orm"
 
 const POSTS_PER_PAGE = 10
 
 export type Post = typeof posts.$inferSelect
 
-export async function getPublishedPosts(page = 1) {
+export async function getPublishedPosts(page = 1, sort: "newest" | "oldest" = "newest") {
+  const order = sort === "oldest" ? asc(posts.createdAt) : desc(posts.createdAt)
   const offset = (page - 1) * POSTS_PER_PAGE
   const result = await db
     .select()
     .from(posts)
     .where(and(eq(posts.published, 1), isNull(posts.deletedAt)))
-    .orderBy(desc(posts.createdAt))
+    .orderBy(order)
     .limit(POSTS_PER_PAGE)
     .offset(offset)
     .all()

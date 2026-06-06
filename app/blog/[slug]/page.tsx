@@ -118,7 +118,7 @@ export default async function PostPage({ params, searchParams }: Props) {
             Draft preview
           </div>
         )}
-        <h1 className="text-3xl font-bold leading-tight">{post.title}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold leading-tight">{post.title}</h1>
         <div className="mt-3 flex items-center gap-3 text-sm text-neutral-500 dark:text-neutral-400">
           <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
         </div>
@@ -191,11 +191,11 @@ async function SeriesNav({
         {currentIndex + 1} of {posts.length}
       </span>
       {(previous || next) && (
-        <div className="mt-3 flex items-center justify-between text-sm">
+        <div className="mt-3 flex items-center justify-between text-xs sm:text-sm">
           {previous ? (
             <Link
               href={`/blog/${previous.slug}`}
-              className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+              className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 max-w-[48%] truncate"
             >
               &larr; {previous.title}
             </Link>
@@ -205,7 +205,7 @@ async function SeriesNav({
           {next && (
             <Link
               href={`/blog/${next.slug}`}
-              className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 text-right"
+              className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 text-right max-w-[48%] truncate"
             >
               {next.title} &rarr;
             </Link>

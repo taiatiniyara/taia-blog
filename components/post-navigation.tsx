@@ -2,6 +2,17 @@ import Link from "next/link"
 
 type AdjacentPost = { slug: string; title: string } | null
 
+function TruncatedTitle({ title }: { title: string }) {
+  return (
+    <>
+      <span className="hidden sm:inline">{title}</span>
+      <span className="sm:hidden">
+        {title.length > 30 ? title.slice(0, 27) + "..." : title}
+      </span>
+    </>
+  )
+}
+
 export function PostNavigation({
   previous,
   next,
@@ -12,16 +23,16 @@ export function PostNavigation({
   if (!previous && !next) return null
 
   return (
-    <nav className="mt-12 pt-6 border-t border-neutral-200 dark:border-neutral-800 grid grid-cols-2 gap-4">
+    <nav className="mt-12 pt-6 border-t border-neutral-200 dark:border-neutral-800 grid grid-cols-2 gap-3 sm:gap-4">
       <div>
         {previous && (
           <Link
             href={`/blog/${previous.slug}`}
-            className="group text-sm"
+            className="group text-xs sm:text-sm"
           >
             <span className="text-neutral-400 dark:text-neutral-500">&larr; Older</span>
-            <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100">
-              {previous.title}
+            <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100 leading-snug">
+              <TruncatedTitle title={previous.title} />
             </span>
           </Link>
         )}
@@ -30,11 +41,11 @@ export function PostNavigation({
         {next && (
           <Link
             href={`/blog/${next.slug}`}
-            className="group text-sm"
+            className="group text-xs sm:text-sm"
           >
             <span className="text-neutral-400 dark:text-neutral-500">Newer &rarr;</span>
-            <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100">
-              {next.title}
+            <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100 leading-snug">
+              <TruncatedTitle title={next.title} />
             </span>
           </Link>
         )}
