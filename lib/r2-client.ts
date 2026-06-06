@@ -1,6 +1,7 @@
 import { S3Client } from "@aws-sdk/client-s3"
 import { Upload } from "@aws-sdk/lib-storage"
 import { GetObjectCommand } from "@aws-sdk/client-s3"
+import { NodeHttpHandler } from "@smithy/node-http-handler"
 
 function isConfigured(): boolean {
   const endpoint = process.env.R2_ENDPOINT
@@ -25,6 +26,10 @@ function getClient(): S3Client {
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
     },
     forcePathStyle: true,
+    requestHandler: new NodeHttpHandler({
+      requestTimeout: 20_000,
+      connectionTimeout: 10_000,
+    }),
   })
 }
 

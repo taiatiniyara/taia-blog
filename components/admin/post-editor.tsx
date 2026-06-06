@@ -15,7 +15,13 @@ type PostEditorProps = {
 async function compressAndUpload(file: File): Promise<string> {
   const formData = new FormData()
   formData.set("file", file)
-  return await uploadImage(formData)
+  const result = await Promise.race([
+    uploadImage(formData),
+    new Promise<string>((_, reject) =>
+      setTimeout(() => reject(new Error("Upload timed out after 30s")), 30000),
+    ),
+  ])
+  return result
 }
 
 export function PostEditor({ initialContent, onChange }: PostEditorProps) {
@@ -260,7 +266,7 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
                   )
                   .run()
               } catch (err) {
-                console.error("Image upload failed:", err)
+                setUploadError(err instanceof Error ? err.message : "Image upload failed")
               } finally {
                 setUploading(false)
               }
