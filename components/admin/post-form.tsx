@@ -40,6 +40,22 @@ export function PostForm({ post }: { post?: PostData }) {
   const [sendResult, setSendResult] = useState<string | null>(null)
   const slugManualRef = useRef(false)
 
+  const titleRef = useRef(title)
+  const slugRef = useRef(slug)
+  const tagsRef = useRef(tags)
+  const seriesRef = useRef(series)
+  const publishedRef = useRef(published)
+  const contentRef = useRef(content)
+  const postRef = useRef(post)
+
+  useEffect(() => { titleRef.current = title }, [title])
+  useEffect(() => { slugRef.current = slug }, [slug])
+  useEffect(() => { tagsRef.current = tags }, [tags])
+  useEffect(() => { seriesRef.current = series }, [series])
+  useEffect(() => { publishedRef.current = published }, [published])
+  useEffect(() => { contentRef.current = content }, [content])
+  useEffect(() => { postRef.current = post }, [post])
+
   useEffect(() => {
     if (isNew && !slugManualRef.current && title) {
       setSlug(generateSlug(title))
@@ -51,47 +67,54 @@ export function PostForm({ post }: { post?: PostData }) {
     setSlug(value)
   }
 
-  const doSave = useCallback(
-    async (publishOverride?: boolean) => {
-      setSaving(true)
-      try {
-        const formData = new FormData()
-        if (post?.id) formData.set("id", String(post.id))
-        formData.set("title", title)
-        formData.set("slug", slug || generateSlug(title))
-        formData.set("tags", tags)
-        formData.set("series", series)
-        formData.set(
-          "published",
-          publishOverride !== undefined
-            ? publishOverride
-              ? "1"
-              : "0"
-            : published
-              ? "1"
-              : "0",
-        )
-        formData.set("content", content ? JSON.stringify(content) : "")
-        await savePost(formData)
-      } catch (err) {
-        console.error("Save failed:", err)
-      } finally {
-        setSaving(false)
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  )
+  const doSave = useCallback(async (publishOverride?: boolean) => {
+    setSaving(true)
+    try {
+      const currentTitle = titleRef.current
+      const currentSlug = slugRef.current
+      const currentTags = tagsRef.current
+      const currentSeries = seriesRef.current
+      const currentPublished = publishedRef.current
+      const currentContent = contentRef.current
+      const currentPost = postRef.current
+
+      const formData = new FormData()
+      if (currentPost?.id) formData.set("id", String(currentPost.id))
+      formData.set("title", currentTitle)
+      formData.set("slug", currentSlug || generateSlug(currentTitle))
+      formData.set("tags", currentTags)
+      formData.set("series", currentSeries)
+      formData.set(
+        "published",
+        publishOverride !== undefined
+          ? publishOverride
+            ? "1"
+            : "0"
+          : currentPublished
+            ? "1"
+            : "0",
+      )
+      formData.set("content", currentContent ? JSON.stringify(currentContent) : "")
+      await savePost(formData)
+    } catch (err) {
+      console.error("Save failed:", err)
+    } finally {
+      setSaving(false)
+    }
+  }, [])
+
+  const doSaveRef = useRef(doSave)
+  useEffect(() => { doSaveRef.current = doSave }, [doSave])
 
   useEffect(() => {
     if (!isNew) return
     const interval = setInterval(() => {
-      if (title && content) {
-        doSave()
+      if (titleRef.current && contentRef.current) {
+        doSaveRef.current()
       }
     }, 30000)
     return () => clearInterval(interval)
-  }, [isNew, doSave, title, content])
+  }, [isNew])
 
   async function handleDelete() {
     if (!post?.id) return

@@ -2,7 +2,6 @@
 
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
-import LinkExtension from "@tiptap/extension-link"
 import ImageExtension from "@tiptap/extension-image"
 import Typography from "@tiptap/extension-typography"
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -39,12 +38,13 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit,
-      LinkExtension.configure({
-        openOnClick: true,
-        HTMLAttributes: {
-          rel: "noopener noreferrer",
-          target: "_blank",
+      StarterKit.configure({
+        link: {
+          openOnClick: true,
+          HTMLAttributes: {
+            rel: "noopener noreferrer",
+            target: "_blank",
+          },
         },
       }),
       ImageExtension,
