@@ -88,9 +88,16 @@ Restart after deploy: `git pull && npm ci && npx drizzle-kit migrate && npm run 
 Create `/etc/nginx/sites-available/taia-blog`:
 
 ```nginx
+# Rate limiting: 10 req/s per IP, burst 20
+limit_req_zone $binary_remote_addr zone=general:10m rate=10r/s;
+
 server {
     listen 80;
     server_name taia.blog;
+    server_tokens off;
+
+    # Limit request body size
+    client_max_body_size 10m;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -101,6 +108,26 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+
+        # Rate limit general requests
+        limit_req zone=general burst=20 nodelay;
+    }
+
+    # Stricter rate limit on auth endpoints
+    location /api/auth/ {
+        limit_req zone=general burst=5 nodelay;
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Deny hidden files
+    location ~ /\. {
+        deny all;
     }
 }
 ```
@@ -108,8 +135,8 @@ server {
 Enable and test:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/taia-blog /etc/nginx/sites-enabled/
 sudo nginx -t
+sudo ln -s /etc/nginx/sites-available/taia-blog /etc/nginx/sites-enabled/
 sudo systemctl reload nginx
 ```
 
@@ -142,13 +169,57 @@ This uploads a serialized copy of `data.db` to `backups/data-YYYY-MM-DD.db` in y
 
 ---
 
-## 8. Uptime monitoring
+## 8. Security checklist
+
+Run these on the VPS:
+
+```bash
+# Harden SSH: disable password auth, use keys only
+sudo sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+sudo sed -i 's/^PermitRootLogin yes/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# Enable firewall, allow only SSH + HTTP/S
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow 'Nginx Full'
+sudo ufw --force enable
+
+# Auto security updates
+sudo apt install -y unattended-upgrades
+sudo dpkg-reconfigure -plow unattended-upgrades
+
+# Verify no env files are served
+curl -s -o /dev/null -w "%{http_code}" https://taia.blog/.env
+# Should return 404 or 403
+```
+
+**Headers applied by Next.js** (in `next.config.ts`):
+| Header | Value |
+|--------|-------|
+| `Content-Security-Policy` | Restricts scripts, styles, images to self + R2 |
+| `Strict-Transport-Security` | 2-year HSTS with subdomains and preload |
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | Disables camera, mic, geolocation |
+
+**nginx hardening:**
+- Rate limiting: 10 req/s general, 5 req/s burst on auth endpoints
+- `server_tokens off` — hides nginx version
+- `client_max_body_size 10m` — prevents oversized request attacks
+- Denies access to hidden files (`/\.`)
+
+---
+
+## 9. Uptime monitoring
 
 Sign up for a free [UptimeRobot](https://uptimerobot.com) account. Add a monitor for `https://taia.blog` with 5-minute checks. Set email alerts.
 
 ---
 
-## 9. Post-deploy checklist
+## 10. Post-deploy checklist
 
 - [ ] Visit `https://taia.blog` — homepage loads with seed posts
 - [ ] Visit `/admin/login` — "Sign in with GitHub" works
