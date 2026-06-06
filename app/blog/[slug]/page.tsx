@@ -8,6 +8,8 @@ import { getSeriesPosts } from "@/lib/posts"
 import Link from "next/link"
 import type { Metadata } from "next"
 
+export const dynamic = "force-dynamic"
+
 type Props = {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ preview?: string }>
@@ -162,10 +164,4 @@ async function SeriesNav({
       )}
     </div>
   )
-}
-
-export async function generateStaticParams() {
-  const { getAllPublishedSlugs } = await import("@/lib/posts")
-  const slugs = await getAllPublishedSlugs()
-  return slugs.map(({ slug }: { slug: string }) => ({ slug }))
 }

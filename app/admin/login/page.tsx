@@ -1,6 +1,8 @@
 import { signIn } from "@/lib/auth"
 import { AuthError } from "next-auth"
 
+export const dynamic = "force-dynamic"
+
 const errorMessages: Record<string, string> = {
   unauthorized: "That GitHub account is not authorized to access this blog.",
   OAuthSignin: "There was a problem starting the GitHub sign-in.",

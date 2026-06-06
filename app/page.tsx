@@ -2,6 +2,8 @@ import Link from "next/link"
 import { getPublishedPosts, totalPages } from "@/lib/posts"
 import { PostList } from "@/components/post-list"
 
+export const dynamic = "force-dynamic"
+
 export default async function HomePage({
   searchParams,
 }: {

@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { getAllTags } from "@/lib/posts"
 import { PostList } from "@/components/post-list"
+
+export const dynamic = "force-dynamic"
 
 export default async function TagPage({
   params,
@@ -36,9 +37,4 @@ export default async function TagPage({
       )}
     </div>
   )
-}
-
-export async function generateStaticParams() {
-  const tags = await getAllTags()
-  return tags.map((tag) => ({ tag }))
 }
