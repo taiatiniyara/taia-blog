@@ -53,5 +53,5 @@ export default async function AdminPage({
     }
   }
 
-  return <AdminPageClient posts={posts} editingPost={editingPost} />
+  return <AdminPageClient key={edit ?? "list"} posts={posts} editingPost={editingPost} />
 }
