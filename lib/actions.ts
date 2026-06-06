@@ -9,7 +9,6 @@ import { uploadToR2 } from "@/lib/r2-client"
 import { auth } from "@/lib/auth"
 import { sendEmail, isEmailConfigured } from "@/lib/email"
 import { postEmailTemplate } from "@/lib/email-template"
-import sharp from "sharp"
 
 async function requireAuth() {
   const session = await auth()
@@ -164,12 +163,27 @@ export async function uploadImage(formData: FormData): Promise<string> {
   if (!file) throw new Error("No file provided")
 
   const buffer = Buffer.from(await file.arrayBuffer())
-  const webpBuffer = await sharp(buffer).webp({ quality: 80 }).toBuffer()
 
-  const key = `images/${crypto.randomUUID()}.webp`
-  const url = await uploadToR2(key, webpBuffer, "image/webp")
+  let uploadBuffer: Buffer
+  let contentType: string
+  let ext: string
 
-  console.error("[uploadImage] %s (%d→%d bytes) → %s", file.name, file.size, webpBuffer.length, url)
+  try {
+    const sharp = (await import("sharp")).default
+    uploadBuffer = await sharp(buffer).webp({ quality: 85 }).toBuffer()
+    contentType = "image/webp"
+    ext = "webp"
+  } catch (err) {
+    console.error("[uploadImage] sharp conversion failed, using original: %s", err instanceof Error ? err.message : String(err))
+    uploadBuffer = buffer
+    contentType = file.type || "image/octet-stream"
+    ext = file.name.split(".").filter(Boolean).pop()?.toLowerCase() || file.type.split("/").pop() || "bin"
+  }
+
+  const key = `images/${crypto.randomUUID()}.${ext}`
+  const url = await uploadToR2(key, uploadBuffer, contentType)
+
+  console.error("[uploadImage] %s (%d→%d bytes) → %s", file.name, file.size, uploadBuffer.length, url)
   return url
 }
 
