@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { LuMail } from "react-icons/lu"
+import { LuMail, LuLoader2 } from "react-icons/lu"
 import { subscribe } from "@/lib/actions"
 
 export function SubscribeForm() {
@@ -43,9 +43,16 @@ export function SubscribeForm() {
         <button
           type="submit"
           disabled={status === "loading"}
-          className="px-4 py-2 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 disabled:opacity-50 shrink-0"
+          className="px-4 py-2 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 disabled:opacity-70 shrink-0 inline-flex items-center gap-1.5 transition-opacity"
         >
-          {status === "loading" ? "..." : "Subscribe"}
+          {status === "loading" ? (
+            <>
+              <LuLoader2 size={14} className="animate-spin" />
+              Subscribing
+            </>
+          ) : (
+            "Subscribe"
+          )}
         </button>
       </form>
       {status !== "idle" && (
