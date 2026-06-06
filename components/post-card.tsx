@@ -2,7 +2,15 @@ import Link from "next/link"
 import type { Post } from "@/lib/posts"
 import { formatDate } from "@/lib/format-date"
 
-export function PostCard({ post, compact = false }: { post: Post; compact?: boolean }) {
+export function PostCard({
+  post,
+  compact = false,
+  excerpt,
+}: {
+  post: Post
+  compact?: boolean
+  excerpt?: string
+}) {
   const tags = post.tags
     ? post.tags.split(",").map((t) => t.trim()).filter(Boolean)
     : []
@@ -14,9 +22,14 @@ export function PostCard({ post, compact = false }: { post: Post; compact?: bool
           {post.title}
         </h2>
       </Link>
-      <div className="mt-1 flex items-center gap-3 text-sm text-neutral-500 dark:text-neutral-400">
+      <div className="mt-1 flex items-center gap-3 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
         <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
       </div>
+      {excerpt && (
+        <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed line-clamp-2">
+          {excerpt}
+        </p>
+      )}
       {tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
           {tags.map((tag) => (

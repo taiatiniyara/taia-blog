@@ -2,7 +2,7 @@ import Link from "next/link"
 import type { Post } from "@/lib/posts"
 import { formatDate } from "@/lib/format-date"
 
-export function PostHero({ post }: { post: Post }) {
+export function PostHero({ post, excerpt }: { post: Post; excerpt?: string }) {
   const tags = post.tags
     ? post.tags.split(",").map((t) => t.trim()).filter(Boolean)
     : []
@@ -14,9 +14,14 @@ export function PostHero({ post }: { post: Post }) {
           {post.title}
         </h1>
       </Link>
-      <div className="mt-3 flex items-center gap-3 text-sm text-neutral-500 dark:text-neutral-400">
+      <div className="mt-3 flex items-center gap-3 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
         <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
       </div>
+      {excerpt && (
+        <p className="mt-3 text-sm sm:text-base text-neutral-600 dark:text-neutral-400 leading-relaxed line-clamp-3">
+          {excerpt}
+        </p>
+      )}
       {tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {tags.map((tag) => (
