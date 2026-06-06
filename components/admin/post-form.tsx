@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import { PostEditor } from "./post-editor"
-import { savePost, deletePost } from "@/lib/actions"
+import { savePost, deletePost, getPreviewUrl } from "@/lib/actions"
 import { useRouter } from "next/navigation"
 
 type PostData = {
@@ -194,6 +194,18 @@ export function PostForm({ post }: { post?: PostData }) {
           {saving && (
             <span className="text-xs text-neutral-400">Saving...</span>
           )}
+          <button
+            type="button"
+            onClick={async () => {
+              await doSave()
+              const finalSlug = slug || generateSlug(title)
+              const url = await getPreviewUrl(finalSlug)
+              window.open(url, "_blank")
+            }}
+            className="px-4 py-2 text-sm border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300"
+          >
+            Preview
+          </button>
           <button
             type="button"
             onClick={() => doSave()}

@@ -130,3 +130,11 @@ export async function uploadImage(formData: FormData): Promise<string> {
   const url = await uploadToR2(key, buffer, file.type || "image/webp")
   return url
 }
+
+export async function getPreviewUrl(slug: string): Promise<string> {
+  await requireAuth()
+
+  const token = process.env.PREVIEW_TOKEN ?? ""
+  const siteUrl = process.env.SITE_URL ?? "http://localhost:3000"
+  return `${siteUrl}/blog/${slug}?preview=${token}`
+}
