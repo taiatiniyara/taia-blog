@@ -80,7 +80,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col font-sans">
         <Header />
-        <main className="flex-1 mx-auto w-full max-w-2xl px-4 py-8">
+        <main className="flex-1 px-4 py-8">
           {children}
         </main>
         <Footer />

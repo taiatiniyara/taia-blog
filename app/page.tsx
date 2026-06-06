@@ -1,8 +1,8 @@
 import Link from "next/link"
 import { getPublishedPosts, totalPages } from "@/lib/posts"
 import { PostCard } from "@/components/post-card"
-import { PostHero } from "@/components/post-hero"
 import { loadContent } from "@/lib/content-store"
+import { PageWrapper } from "@/components/page-wrapper"
 
 export const dynamic = "force-dynamic"
 
@@ -51,12 +51,8 @@ export default async function HomePage({
   const pages = await totalPages()
   const excerpts = await loadExcerpts(posts)
 
-  const isFirst = page === 1
-  const featured = isFirst && sort === "newest" ? posts[0] : null
-  const grid = isFirst && featured ? posts.slice(1) : posts
-
   return (
-    <div>
+    <PageWrapper>
       <div className="flex items-center justify-between mb-6">
         <div />
         <div className="flex items-center gap-1 text-xs sm:text-sm">
@@ -83,34 +79,21 @@ export default async function HomePage({
         </div>
       </div>
 
-      {featured && (
-        <PostHero post={featured} excerpt={excerpts.get(featured.slug) ?? undefined} />
-      )}
-
-      {grid.length > 0 ? (
-        <div className={featured ? "mt-12" : ""}>
-          {featured && (
-            <h2 className="text-sm font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wide mb-6">
-              Recent Posts
-            </h2>
-          )}
-          <div className="grid gap-8 sm:grid-cols-2">
-            {grid.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                compact
-                excerpt={excerpts.get(post.slug) ?? undefined}
-              />
-            ))}
-          </div>
+      {posts.length > 0 ? (
+        <div className="grid gap-8 sm:grid-cols-2">
+          {posts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              compact
+              excerpt={excerpts.get(post.slug) ?? undefined}
+            />
+          ))}
         </div>
       ) : (
-        !featured && (
-          <div className="py-12 text-center text-neutral-500 dark:text-neutral-400 text-sm">
-            No posts yet.
-          </div>
-        )
+        <div className="py-12 text-center text-neutral-500 dark:text-neutral-400 text-sm">
+          No posts yet.
+        </div>
       )}
 
       {page < pages && (
@@ -123,6 +106,6 @@ export default async function HomePage({
           </Link>
         </div>
       )}
-    </div>
+    </PageWrapper>
   )
 }

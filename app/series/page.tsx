@@ -1,11 +1,13 @@
 import Link from "next/link"
 import { getAllSeries } from "@/lib/posts"
+import { PageWrapper } from "@/components/page-wrapper"
 
 export default async function SeriesPage() {
   const seriesList = await getAllSeries()
 
   return (
-    <div>
+    <PageWrapper>
+      <div>
       <h1 className="text-xl sm:text-2xl font-semibold mb-6">Series</h1>
       {seriesList.length === 0 ? (
         <p className="text-neutral-500 dark:text-neutral-400">No series yet.</p>
@@ -23,6 +25,7 @@ export default async function SeriesPage() {
           ))}
         </ul>
       )}
-    </div>
+      </div>
+    </PageWrapper>
   )
 }

@@ -1,8 +1,10 @@
 import Link from "next/link"
+import { PageWrapper } from "@/components/page-wrapper"
 
 export default function NotFound() {
   return (
-    <div className="py-20 text-center">
+    <PageWrapper>
+      <div className="py-20 text-center">
       <h1 className="text-4xl font-bold">404</h1>
       <p className="mt-4 text-neutral-500 dark:text-neutral-400">
         Page not found.
@@ -13,6 +15,7 @@ export default function NotFound() {
       >
         &larr; Home
       </Link>
-    </div>
+      </div>
+    </PageWrapper>
   )
 }

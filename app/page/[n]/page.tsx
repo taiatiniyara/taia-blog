@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { getPublishedPosts, totalPages } from "@/lib/posts"
 import { PostCard } from "@/components/post-card"
+import { PageWrapper } from "@/components/page-wrapper"
 import { notFound } from "next/navigation"
 
 export default async function PaginatedPage({
@@ -22,7 +23,8 @@ export default async function PaginatedPage({
   if (posts.length === 0 && page > pages) notFound()
 
   return (
-    <div>
+    <PageWrapper>
+      <div>
       <h2 className="text-sm font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wide mb-6">
         Page {page}
       </h2>
@@ -51,6 +53,7 @@ export default async function PaginatedPage({
           </Link>
         </div>
       )}
-    </div>
+      </div>
+    </PageWrapper>
   )
 }

@@ -2,6 +2,7 @@ import Link from "next/link"
 import { getSeriesPosts, getAllSeries } from "@/lib/posts"
 import { formatDate } from "@/lib/format-date"
 import { notFound } from "next/navigation"
+import { PageWrapper } from "@/components/page-wrapper"
 import type { Metadata } from "next"
 
 type Props = {
@@ -36,7 +37,8 @@ export default async function SeriesDetailPage({ params }: Props) {
             <span className="text-sm text-neutral-400 dark:text-neutral-500 font-mono tabular-nums w-6 shrink-0">
               {i + 1}.
             </span>
-            <div>
+    <PageWrapper>
+      <div>
               <Link
                 href={`/blog/${post.slug}`}
                 className="text-neutral-900 dark:text-neutral-100 hover:text-neutral-600 dark:hover:text-neutral-400"
@@ -46,7 +48,8 @@ export default async function SeriesDetailPage({ params }: Props) {
               <span className="text-sm text-neutral-500 dark:text-neutral-400 ml-2">
                 {formatDate(post.createdAt)}
               </span>
-            </div>
+      </div>
+    </PageWrapper>
           </li>
         ))}
       </ol>

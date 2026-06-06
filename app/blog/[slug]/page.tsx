@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { getPostBySlugPublished, getPostBySlug, getAdjacentPosts } from "@/lib/posts"
+import { getPostBySlugPublished, getPostBySlug, getAdjacentPosts, getPublishedPosts } from "@/lib/posts"
 import { formatDate } from "@/lib/format-date"
 import { PostNavigation } from "@/components/post-navigation"
 import { loadContent } from "@/lib/content-store"
@@ -81,6 +81,9 @@ export default async function PostPage({ params, searchParams }: Props) {
 
   if (!post) notFound()
 
+  const recentPosts = await getPublishedPosts(1)
+  const sidebarPosts = recentPosts.filter((p) => p.slug !== slug).slice(0, 5)
+
   const { previous, next } = isValidPreview
     ? { previous: null, next: null }
     : await getAdjacentPosts(slug)
@@ -93,8 +96,9 @@ export default async function PostPage({ params, searchParams }: Props) {
     : []
 
   return (
-    <article>
-      <script
+    <div className="mx-auto max-w-5xl lg:grid lg:grid-cols-[1fr_280px] lg:gap-10">
+      <article>
+        <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
@@ -151,6 +155,32 @@ export default async function PostPage({ params, searchParams }: Props) {
 
       <PostNavigation previous={previous} next={next} />
     </article>
+
+    {sidebarPosts.length > 0 && (
+      <aside className="mt-10 lg:mt-0 lg:block">
+        <div className="lg:sticky lg:top-8">
+          <h3 className="text-sm font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wide mb-4">
+            Recent Posts
+          </h3>
+          <ul className="space-y-3">
+            {sidebarPosts.map((p) => (
+              <li key={p.slug}>
+                <Link
+                  href={`/blog/${p.slug}`}
+                  className="text-sm text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 leading-snug line-clamp-2"
+                >
+                  {p.title}
+                </Link>
+                <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5">
+                  {formatDate(p.createdAt)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+      )}
+  </div>
   )
 }
 

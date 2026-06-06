@@ -6,7 +6,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-neutral-200 dark:border-neutral-800">
-      <div className="mx-auto max-w-2xl px-4 py-8 sm:py-10">
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
         <div className="mb-6">
           <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
             Subscribe by email
