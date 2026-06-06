@@ -5,7 +5,6 @@ import StarterKit from "@tiptap/starter-kit"
 import ImageExtension from "@tiptap/extension-image"
 import Typography from "@tiptap/extension-typography"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { uploadImage } from "@/lib/actions"
 
 type PostEditorProps = {
   initialContent?: Record<string, unknown>
@@ -15,13 +14,16 @@ type PostEditorProps = {
 async function compressAndUpload(file: File): Promise<string> {
   const formData = new FormData()
   formData.set("file", file)
-  const result = await Promise.race([
-    uploadImage(formData),
-    new Promise<string>((_, reject) =>
-      setTimeout(() => reject(new Error("Upload timed out after 120s")), 120000),
-    ),
-  ])
-  return result
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error || `Upload failed (${res.status})`)
+  }
+  const { url } = await res.json()
+  return url
 }
 
 export function PostEditor({ initialContent, onChange }: PostEditorProps) {
