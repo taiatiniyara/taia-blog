@@ -20,21 +20,53 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostBySlugPublished(slug)
   if (!post) return {}
 
+  const content = await loadContent(slug)
+  const description = extractDescription(content, post.title)
+
   const baseUrl = process.env.SITE_URL ?? "http://localhost:3000"
+  const ogImage = `${baseUrl}/og-image.png`
 
   return {
     title: post.title,
-    description: post.title,
+    description,
+    alternates: {
+      canonical: `${baseUrl}/blog/${post.slug}`,
+    },
+    authors: [{ name: "Taia" }],
     openGraph: {
       title: post.title,
-      description: post.title,
+      description,
       type: "article",
       publishedTime: post.createdAt,
       modifiedTime: post.updatedAt,
       url: `${baseUrl}/blog/${post.slug}`,
-      images: [`${baseUrl}/og-image.png`],
+      images: [{ url: ogImage, width: 1200, height: 630 }],
+      tags: post.tags?.split(",").map((t) => t.trim()).filter(Boolean),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description,
+      images: [ogImage],
     },
   }
+}
+
+function extractDescription(
+  content: Record<string, unknown> | null,
+  fallback: string,
+): string {
+  if (!content) return fallback
+  const extract = (node: unknown): string => {
+    if (typeof node === "string") return node
+    if (Array.isArray(node)) return node.map(extract).join(" ")
+    if (node && typeof node === "object" && "text" in node) return String((node as Record<string, unknown>).text)
+    if (node && typeof node === "object" && "content" in node) return extract((node as Record<string, unknown>).content)
+    return ""
+  }
+  const text = extract((content as Record<string, unknown>).content)
+  const clean = text.replace(/\s+/g, " ").trim()
+  return clean.slice(0, 160).replace(/\s+\S*$/, "") || fallback
 }
 
 export default async function PostPage({ params, searchParams }: Props) {
@@ -62,6 +94,24 @@ export default async function PostPage({ params, searchParams }: Props) {
 
   return (
     <article>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            headline: post.title,
+            datePublished: post.createdAt,
+            dateModified: post.updatedAt,
+            author: {
+              "@type": "Person",
+              name: "Taia",
+            },
+            url: `${process.env.SITE_URL ?? "http://localhost:3000"}/blog/${post.slug}`,
+            ...(tags.length > 0 && { keywords: tags.join(", ") }),
+          }),
+        }}
+      />
       <header className="mb-8">
         {isValidPreview && !post.published && (
           <div className="mb-4 px-3 py-1.5 text-xs font-medium bg-yellow-100 dark:bg-yellow-950 text-yellow-800 dark:text-yellow-300 rounded-lg inline-block">

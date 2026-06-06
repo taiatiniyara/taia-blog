@@ -62,6 +62,17 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${sourceSerif4.variable}`}>
       <head>
         <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Taia's Blog",
+              url: baseUrl,
+            }),
+          }}
+        />
+        <script
           dangerouslySetInnerHTML={{
             __html: `try{var t=document.cookie.match(/theme=([^;]+)/);if(t&&t[1]==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
           }}
