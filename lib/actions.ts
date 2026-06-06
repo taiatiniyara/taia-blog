@@ -10,7 +10,7 @@ import { auth } from "@/lib/auth"
 
 async function requireAuth() {
   const session = await auth()
-  if (!session?.user || session.user.name !== process.env.ADMIN_GITHUB_USER) {
+  if (!session?.user || session.user.name?.toLowerCase() !== process.env.ADMIN_GITHUB_USER?.toLowerCase()) {
     throw new Error("Unauthorized")
   }
 }
