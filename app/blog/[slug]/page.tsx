@@ -8,8 +8,6 @@ import { getSeriesPosts } from "@/lib/posts"
 import Link from "next/link"
 import type { Metadata } from "next"
 
-export const revalidate = 3600
-
 type Props = {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ preview?: string }>
