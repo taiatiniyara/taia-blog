@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { LuMail, LuLoader2 } from "react-icons/lu"
+import { LuMail, LuLoader } from "react-icons/lu"
 import { subscribe } from "@/lib/actions"
 
 export function SubscribeForm() {
@@ -47,7 +47,7 @@ export function SubscribeForm() {
         >
           {status === "loading" ? (
             <>
-              <LuLoader2 size={14} className="animate-spin" />
+              <LuLoader size={14} className="animate-spin" />
               Subscribing
             </>
           ) : (
