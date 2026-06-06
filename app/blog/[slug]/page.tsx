@@ -89,7 +89,7 @@ export default async function PostPage({ params, searchParams }: Props) {
 
       {post.series && <SeriesNav series={post.series} currentSlug={slug} />}
 
-      <div className="prose prose-neutral dark:prose-invert max-w-none">
+      <div className="prose prose-neutral dark:prose-invert max-w-none font-serif">
         {contentHTML ? (
           <div dangerouslySetInnerHTML={{ __html: contentHTML }} />
         ) : (
