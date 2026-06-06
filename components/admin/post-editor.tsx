@@ -228,7 +228,44 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
         >
           Link
         </ToolbarButton>
-        {uploading && (
+        <span className="w-px h-5 bg-neutral-300 dark:bg-neutral-700 mx-1" />
+        <ToolbarButton
+          onClick={() => {
+            const input = document.createElement("input")
+            input.type = "file"
+            input.accept = "image/*"
+            input.multiple = true
+            input.onchange = async () => {
+              const files = input.files
+              if (!files || files.length === 0) return
+              setUploading(true)
+              try {
+                const urls = await Promise.all(
+                  Array.from(files).map(compressAndUpload),
+                )
+                editor
+                  .chain()
+                  .focus()
+                  .insertContent(
+                    urls.map((url) => ({
+                      type: "image",
+                      attrs: { src: url },
+                    })),
+                  )
+                  .run()
+              } catch (err) {
+                console.error("Image upload failed:", err)
+              } finally {
+                setUploading(false)
+              }
+            }
+            input.click()
+          }}
+          active={false}
+          label="Insert image"
+        >
+          Img
+        </ToolbarButton>        {uploading && (
           <span className="ml-2 text-xs text-neutral-400">Uploading...</span>
         )}
       </div>
