@@ -95,7 +95,11 @@ export function PostForm({ post }: { post?: PostData }) {
             : "0",
       )
       formData.set("content", currentContent ? JSON.stringify(currentContent) : "")
-      await savePost(formData)
+      const result = await savePost(formData)
+      if (!currentPost?.id && result?.id) {
+        const finalSlug = currentSlug || generateSlug(currentTitle)
+        window.history.replaceState(null, "", `/admin?edit=${finalSlug}`)
+      }
     } catch (err) {
       console.error("Save failed:", err)
     } finally {

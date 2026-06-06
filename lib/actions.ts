@@ -26,68 +26,105 @@ function generateSlug(title: string): string {
 }
 
 export async function savePost(formData: FormData) {
-  await requireAuth()
+  try {
+    await requireAuth()
 
-  const title = formData.get("title") as string
-  const slug = formData.get("slug") as string
-  const tags = formData.get("tags") as string
-  const series = formData.get("series") as string
-  const published = formData.get("published") === "1" ? 1 : 0
-  const contentJSON = formData.get("content") as string
-  const existingId = formData.get("id") as string
+    const title = formData.get("title") as string
+    const slug = formData.get("slug") as string
+    const tags = formData.get("tags") as string
+    const series = formData.get("series") as string
+    const published = formData.get("published") === "1" ? 1 : 0
+    const contentJSON = formData.get("content") as string
+    const existingId = formData.get("id") as string
 
-  if (!title || !slug) throw new Error("Title and slug are required")
+    console.error("[savePost] title=%s slug=%s existingId=%s", title || "(empty)", slug || "(empty)", existingId || "(none)")
 
-  const finalSlug = slug || generateSlug(title)
-  const contentKey = `content/${finalSlug}.json`
-  const now = new Date().toISOString()
+    if (!title || !slug) throw new Error("Title and slug are required")
 
-  let parsed: unknown = null
-  if (contentJSON) {
-    try {
-      parsed = JSON.parse(contentJSON)
-    } catch {
-      throw new Error("Invalid content JSON")
+    const finalSlug = slug || generateSlug(title)
+    const contentKey = `content/${finalSlug}.json`
+    const now = new Date().toISOString()
+
+    let parsed: unknown = null
+    if (contentJSON) {
+      try {
+        parsed = JSON.parse(contentJSON)
+      } catch {
+        throw new Error("Invalid content JSON")
+      }
     }
-  }
 
-  if (existingId) {
-    await db
-      .update(posts)
-      .set({
-        title,
-        slug: finalSlug,
-        tags: tags || "",
-        series: series || null,
-        published,
-        contentKey,
-        updatedAt: now,
-      })
-      .where(eq(posts.id, parseInt(existingId, 10)))
-      .run()
-  } else {
-    await db
-      .insert(posts)
-      .values({
-        title,
-        slug: finalSlug,
-        tags: tags || "",
-        series: series || null,
-        published,
-        contentKey,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .run()
-  }
+    let postId: number
 
-  if (parsed) {
-    await saveContent(finalSlug, parsed)
-  }
+    if (existingId) {
+      postId = parseInt(existingId, 10)
+      await db
+        .update(posts)
+        .set({
+          title,
+          slug: finalSlug,
+          tags: tags || "",
+          series: series || null,
+          published,
+          contentKey,
+          updatedAt: now,
+        })
+        .where(eq(posts.id, postId))
+        .run()
+    } else {
+      const existingSlug = await db
+        .select({ id: posts.id })
+        .from(posts)
+        .where(and(eq(posts.slug, finalSlug), isNull(posts.deletedAt)))
+        .get()
 
-  revalidatePath("/")
-  revalidatePath("/admin")
-  revalidatePath(`/blog/${finalSlug}`)
+      if (existingSlug) {
+        postId = existingSlug.id
+        await db
+          .update(posts)
+          .set({
+            title,
+            slug: finalSlug,
+            tags: tags || "",
+            series: series || null,
+            published,
+            contentKey,
+            updatedAt: now,
+          })
+          .where(eq(posts.id, postId))
+          .run()
+      } else {
+        const result = await db
+          .insert(posts)
+          .values({
+            title,
+            slug: finalSlug,
+            tags: tags || "",
+            series: series || null,
+            published,
+            contentKey,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .returning({ id: posts.id })
+        postId = result[0].id
+      }
+    }
+
+    if (parsed) {
+      await saveContent(finalSlug, parsed)
+    }
+
+    revalidatePath("/")
+    revalidatePath("/admin")
+    revalidatePath(`/blog/${finalSlug}`)
+
+    return { id: postId }
+  } catch (err) {
+    console.error("[savePost] ERROR:", err instanceof Error ? err.message : String(err))
+    console.error("[savePost] STACK:", err instanceof Error ? err.stack : "")
+    throw err
+  }
 }
 
 export async function deletePost(formData: FormData) {
