@@ -18,7 +18,7 @@ async function compressAndUpload(file: File): Promise<string> {
   const result = await Promise.race([
     uploadImage(formData),
     new Promise<string>((_, reject) =>
-      setTimeout(() => reject(new Error("Upload timed out after 30s")), 30000),
+      setTimeout(() => reject(new Error("Upload timed out after 120s")), 120000),
     ),
   ])
   return result

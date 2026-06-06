@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  serverExternalPackages: ["better-sqlite3", "sharp"],
+  serverExternalPackages: ["better-sqlite3"],
   poweredByHeader: false,
   async headers() {
     return [

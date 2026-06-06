@@ -163,27 +163,11 @@ export async function uploadImage(formData: FormData): Promise<string> {
   if (!file) throw new Error("No file provided")
 
   const buffer = Buffer.from(await file.arrayBuffer())
-
-  let uploadBuffer: Buffer
-  let contentType: string
-  let ext: string
-
-  try {
-    const sharp = (await import("sharp")).default
-    uploadBuffer = await sharp(buffer).webp({ quality: 85 }).toBuffer()
-    contentType = "image/webp"
-    ext = "webp"
-  } catch (err) {
-    console.error("[uploadImage] sharp conversion failed, using original: %s", err instanceof Error ? err.message : String(err))
-    uploadBuffer = buffer
-    contentType = file.type || "image/octet-stream"
-    ext = file.name.split(".").filter(Boolean).pop()?.toLowerCase() || file.type.split("/").pop() || "bin"
-  }
-
+  const ext = file.name.split(".").filter(Boolean).pop()?.toLowerCase() || file.type.split("/").pop() || "bin"
   const key = `images/${crypto.randomUUID()}.${ext}`
-  const url = await uploadToR2(key, uploadBuffer, contentType)
+  const url = await uploadToR2(key, buffer, file.type || "image/octet-stream")
 
-  console.error("[uploadImage] %s (%d→%d bytes) → %s", file.name, file.size, uploadBuffer.length, url)
+  console.error("[uploadImage] %s (%d bytes) → %s", file.name, file.size, url)
   return url
 }
 
