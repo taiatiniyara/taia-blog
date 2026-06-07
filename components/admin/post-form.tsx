@@ -48,7 +48,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
     setSlug(value)
   }
 
-  async function handleSave(publishOverride?: boolean) {
+  async function handleSave(publishOverride?: boolean, sendEmail = false) {
     if (!formRef.current) return
     setSaving(true)
     try {
@@ -67,6 +67,9 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
             : "0",
       )
       fd.set("content", contentRef.current ? JSON.stringify(contentRef.current) : "")
+      if (sendEmail) {
+        fd.set("sendEmail", "true")
+      }
       const result = await savePost(fd)
       if (!post?.id && result?.id) {
         setSavedId(result.id)
@@ -148,6 +151,13 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
             className="px-4 py-2 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200"
           >
             {isNew ? "Save Draft" : "Save"}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSave(true, true)}
+            className="px-4 py-2 text-sm bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-600"
+          >
+            Publish
           </button>
         </div>
       </div>

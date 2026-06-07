@@ -30,7 +30,7 @@ export async function savePost(formData: FormData) {
     const contentJSON = formData.get("content") as string
     const existingId = formData.get("id") as string
 
-    console.error("[savePost] title=%s slug=%s existingId=%s", title || "(empty)", slug || "(empty)", existingId || "(none)")
+    console.log("[savePost] title=%s slug=%s existingId=%s", title || "(empty)", slug || "(empty)", existingId || "(none)")
 
     if (!title || !slug) throw new Error("Title and slug are required")
 
@@ -86,7 +86,7 @@ export async function savePost(formData: FormData) {
           })
           .where(eq(posts.id, postId))
           .run()
-        console.error("[savePost] Slug collision: overwrote existing post id=%d with slug=%s", postId, finalSlug)
+        console.log("[savePost] Slug collision: overwrote existing post id=%d with slug=%s", postId, finalSlug)
       } else {
         const result = await db
           .insert(posts)
@@ -113,10 +113,11 @@ export async function savePost(formData: FormData) {
     revalidatePath("/admin")
     revalidatePath(`/blog/${finalSlug}`)
 
-    if (!existingId && published === 1) {
+    const shouldSendEmail = formData.get("sendEmail") === "true"
+    if (shouldSendEmail && published === 1 && isEmailConfigured()) {
       sendPostToSubscribers(finalSlug).then(
-        (result) => console.error("[savePost] Auto-sent to %d subscribers", result.total),
-        (err) => console.error("[savePost] Auto-send failed:", err instanceof Error ? err.message : String(err)),
+        (result) => console.log("[savePost] Sent to %d subscribers", result.total),
+        (err) => console.error("[savePost] Send failed:", err instanceof Error ? err.message : String(err)),
       )
     }
 
@@ -190,7 +191,7 @@ export async function uploadImage(formData: FormData): Promise<string> {
   const key = `images/${crypto.randomUUID()}.${keyExt}`
   const url = await uploadToR2(key, uploadBuffer, contentType)
 
-  console.error("[uploadImage] %s (%d bytes) → %s", file.name, file.size, url)
+  console.log("[uploadImage] %s (%d bytes) → %s", file.name, file.size, url)
   return url
 }
 
