@@ -83,7 +83,7 @@ export function AdminPageClient({
           No posts yet.
         </p>
       ) : (
-        <div className="overflow-x-auto -mx-4 px-4">
+        <div className="overflow-x-auto">
           <table className="w-full text-xs sm:text-sm">
             <thead>
               <tr className="border-b text-left text-neutral-500 dark:text-neutral-400">

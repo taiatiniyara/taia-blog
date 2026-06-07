@@ -20,7 +20,7 @@ export default async function LoginPage({
   const message = error ? errorMessages[error] ?? errorMessages.default : null
 
   return (
-    <div className="py-20 text-center">
+    <div className="max-w-md mx-auto px-4 sm:px-6 py-20 text-center">
       <h1 className="text-2xl font-semibold mb-4">Admin</h1>
       <p className="text-neutral-500 dark:text-neutral-400 mb-2">
         Sign in to manage your blog.
