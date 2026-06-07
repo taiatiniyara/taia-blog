@@ -69,6 +69,7 @@ export function SubscriberManager({ subscribers }: { subscribers: Subscriber[] }
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="email@example.com"
+          aria-label="Subscriber email"
           required
           className="px-3 py-1.5 text-sm border rounded-lg bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 w-64"
         />

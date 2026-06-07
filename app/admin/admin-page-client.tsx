@@ -167,6 +167,7 @@ export function AdminPageClient({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search title or tags..."
+              aria-label="Search posts"
               className="px-3 py-1.5 text-sm border rounded-lg bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 w-48"
             />
 
@@ -191,6 +192,7 @@ export function AdminPageClient({
               <select
                 value={seriesFilter}
                 onChange={(e) => setSeriesFilter(e.target.value)}
+                aria-label="Filter by series"
                 className="px-3 py-1.5 text-sm border rounded-lg bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600"
               >
                 <option value="">All series</option>

@@ -2,7 +2,7 @@
 
 import { db } from "@/db/client"
 import { posts, subscribers } from "@/db/schema"
-import { eq, isNull, desc, and } from "drizzle-orm"
+import { eq, isNull, desc, and, gte } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { saveContent, loadContent } from "@/lib/content-store"
 import { uploadToR2 } from "@/lib/r2-client"
@@ -86,6 +86,7 @@ export async function savePost(formData: FormData) {
           })
           .where(eq(posts.id, postId))
           .run()
+        console.error("[savePost] Slug collision: overwrote existing post id=%d with slug=%s", postId, finalSlug)
       } else {
         const result = await db
           .insert(posts)
@@ -162,6 +163,15 @@ export async function uploadImage(formData: FormData): Promise<string> {
   const file = formData.get("file") as File | null
   if (!file) throw new Error("No file provided")
 
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Only image files are allowed")
+  }
+
+  const maxSize = 10 * 1024 * 1024
+  if (file.size > maxSize) {
+    throw new Error("Image must be under 10MB")
+  }
+
   const buffer = Buffer.from(await file.arrayBuffer())
 
   let uploadBuffer: Buffer
@@ -174,9 +184,7 @@ export async function uploadImage(formData: FormData): Promise<string> {
     contentType = "image/webp"
     keyExt = "webp"
   } catch {
-    uploadBuffer = buffer
-    contentType = file.type || "image/octet-stream"
-    keyExt = file.name.split(".").filter(Boolean).pop()?.toLowerCase() || file.type.split("/").pop() || "bin"
+    throw new Error("Failed to process image")
   }
 
   const key = `images/${crypto.randomUUID()}.${keyExt}`
@@ -197,6 +205,17 @@ export async function subscribe(formData: FormData) {
   const email = (formData.get("email") as string)?.trim().toLowerCase()
   if (!email || !email.includes("@")) {
     throw new Error("Valid email required")
+  }
+
+  const sixtySecondsAgo = new Date(Date.now() - 60_000).toISOString()
+  const recent = await db
+    .select({ id: subscribers.id })
+    .from(subscribers)
+    .where(and(eq(subscribers.email, email), gte(subscribers.createdAt, sixtySecondsAgo)))
+    .get()
+
+  if (recent) {
+    throw new Error("Please wait before trying again")
   }
 
   const existing = await db

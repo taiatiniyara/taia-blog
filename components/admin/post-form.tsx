@@ -23,6 +23,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
 
   const formRef = useRef<HTMLFormElement>(null)
   const contentRef = useRef<Record<string, unknown> | null>(post?.content ?? null)
+  const [savedId, setSavedId] = useState<number | null>(null)
 
   const [title, setTitle] = useState(post?.title ?? "")
   const [slug, setSlug] = useState(post?.slug ?? "")
@@ -68,6 +69,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
       fd.set("content", contentRef.current ? JSON.stringify(contentRef.current) : "")
       const result = await savePost(fd)
       if (!post?.id && result?.id) {
+        setSavedId(result.id)
         const finalSlug = (fd.get("slug") as string) || generateSlug(fd.get("title") as string)
         window.history.replaceState(null, "", `/admin?edit=${finalSlug}`)
       }
@@ -317,7 +319,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
         />
       </div>
 
-      {post?.id && <input type="hidden" name="id" value={post.id} />}
+      <input type="hidden" name="id" value={post?.id ?? savedId ?? ""} />
     </form>
   )
 }
