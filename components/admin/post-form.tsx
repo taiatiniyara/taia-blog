@@ -32,7 +32,11 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
   const [saving, setSaving] = useState(false)
   const [sending, setSending] = useState(false)
   const [sendResult, setSendResult] = useState<string | null>(null)
+  const [seriesOpen, setSeriesOpen] = useState(false)
+  const [seriesHighlight, setSeriesHighlight] = useState(-1)
   const slugManualRef = useRef(false)
+  const seriesInputRef = useRef<HTMLInputElement>(null)
+  const seriesListRef = useRef<HTMLUListElement>(null)
 
   const titleRef = useRef(title)
   const slugRef = useRef(slug)
@@ -126,6 +130,68 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
 
   return (
     <div className="space-y-6">
+      <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {!isNew && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg"
+            >
+              Delete
+            </button>
+          )}
+          {!isNew && published && (
+            <button
+              type="button"
+              disabled={sending}
+              onClick={async () => {
+                setSending(true)
+                setSendResult(null)
+                try {
+                  const finalSlug = slug || generateSlug(title)
+                  const result = await sendPostToSubscribers(finalSlug)
+                  setSendResult(`Sent to ${result.sent} subscriber${result.sent !== 1 ? "s" : ""}.`)
+                } catch {
+                  setSendResult("Failed to send.")
+                } finally {
+                  setSending(false)
+                }
+              }}
+              className="px-3 py-1.5 text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg"
+            >
+              {sending ? "Sending..." : "Send to subscribers"}
+            </button>
+          )}
+          {sendResult && (
+            <span className="text-xs text-neutral-500">{sendResult}</span>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          {saving && (
+            <span className="text-xs text-neutral-400">Saving...</span>
+          )}
+          <button
+            type="button"
+            onClick={async () => {
+              await doSave()
+              const finalSlug = slug || generateSlug(title)
+              const url = await getPreviewUrl(finalSlug)
+              window.open(url, "_blank")
+            }}
+            className="px-4 py-2 text-sm border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300"
+          >
+            Preview
+          </button>
+          <button
+            type="button"
+            onClick={() => doSave()}
+            className="px-4 py-2 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200"
+          >
+            {isNew ? "Save Draft" : "Save"}
+          </button>
+        </div>
+      </div>
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1 text-neutral-700 dark:text-neutral-300">
@@ -167,24 +233,103 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
           />
         </div>
 
-        <div>
+        <div className="relative">
           <label className="block text-sm font-medium mb-1 text-neutral-700 dark:text-neutral-300">
             Series{" "}
             <span className="font-normal text-neutral-400">(optional, one name)</span>
           </label>
           <input
+            ref={seriesInputRef}
             type="text"
             value={series}
-            onChange={(e) => setSeries(e.target.value)}
-            list="series-list"
+            onChange={(e) => {
+              setSeries(e.target.value)
+              setSeriesOpen(true)
+              setSeriesHighlight(-1)
+            }}
+            onFocus={() => {
+              setSeriesOpen(true)
+              setSeriesHighlight(-1)
+            }}
+            onBlur={() => {
+              setTimeout(() => setSeriesOpen(false), 150)
+            }}
+            onKeyDown={(e) => {
+              const matches = existingSeries.filter((s) =>
+                s.toLowerCase().includes(series.toLowerCase()) && s !== series,
+              )
+              if (e.key === "ArrowDown") {
+                e.preventDefault()
+                setSeriesHighlight((prev) =>
+                  prev < matches.length - 1 ? prev + 1 : 0,
+                )
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault()
+                setSeriesHighlight((prev) =>
+                  prev > 0 ? prev - 1 : matches.length - 1,
+                )
+              } else if (e.key === "Enter" && seriesHighlight >= 0 && seriesHighlight < matches.length) {
+                e.preventDefault()
+                setSeries(matches[seriesHighlight])
+                setSeriesOpen(false)
+              } else if (e.key === "Escape") {
+                setSeriesOpen(false)
+              }
+            }}
             className="w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600"
             placeholder="e.g. My Thoughts on Philosophy"
+            autoComplete="off"
           />
-          <datalist id="series-list">
-            {existingSeries.map((s) => (
-              <option key={s} value={s} />
-            ))}
-          </datalist>
+          {seriesOpen && (() => {
+            const matches = existingSeries.filter((s) =>
+              s.toLowerCase().includes(series.toLowerCase()) && s !== series,
+            )
+            if (matches.length === 0 && !series) return null
+            return (
+              <ul
+                ref={seriesListRef}
+                className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto border rounded-lg bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 shadow-lg"
+              >
+                {matches.map((s, i) => (
+                  <li key={s}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        setSeries(s)
+                        setSeriesOpen(false)
+                      }}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 ${
+                        i === seriesHighlight
+                          ? "bg-neutral-100 dark:bg-neutral-800"
+                          : ""
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  </li>
+                ))}
+                {series && !existingSeries.includes(series) && (
+                  <li>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        setSeriesOpen(false)
+                      }}
+                      className={`w-full text-left px-3 py-2 text-sm text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-800 ${
+                        seriesHighlight === matches.length
+                          ? "bg-neutral-100 dark:bg-neutral-800"
+                          : ""
+                      }`}
+                    >
+                      Create &ldquo;{series}&rdquo;
+                    </button>
+                  </li>
+                )}
+              </ul>
+            )
+          })()}
         </div>
 
         <label className="flex items-center gap-2 text-sm cursor-pointer">
@@ -206,71 +351,6 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
           initialContent={post?.content ?? undefined}
           onChange={setContent}
         />
-      </div>
-
-      <div className="flex items-center justify-between pt-4 border-t">
-        <div>
-          {!isNew && (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg"
-              >
-                Delete
-              </button>
-              {published && (
-                <button
-                  type="button"
-                  disabled={sending}
-                  onClick={async () => {
-                    setSending(true)
-                    setSendResult(null)
-                    try {
-                      const finalSlug = slug || generateSlug(title)
-                      const result = await sendPostToSubscribers(finalSlug)
-                      setSendResult(`Sent to ${result.sent} subscriber${result.sent !== 1 ? "s" : ""}.`)
-                    } catch {
-                      setSendResult("Failed to send.")
-                    } finally {
-                      setSending(false)
-                    }
-                  }}
-                  className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg"
-                >
-                  {sending ? "Sending..." : "Send to subscribers"}
-                </button>
-              )}
-              {sendResult && (
-                <span className="text-xs text-neutral-500">{sendResult}</span>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          {saving && (
-            <span className="text-xs text-neutral-400">Saving...</span>
-          )}
-          <button
-            type="button"
-            onClick={async () => {
-              await doSave()
-              const finalSlug = slug || generateSlug(title)
-              const url = await getPreviewUrl(finalSlug)
-              window.open(url, "_blank")
-            }}
-            className="px-4 py-2 text-sm border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300"
-          >
-            Preview
-          </button>
-          <button
-            type="button"
-            onClick={() => doSave()}
-            className="px-4 py-2 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200"
-          >
-            {isNew ? "Save Draft" : "Save"}
-          </button>
-        </div>
       </div>
     </div>
   )
