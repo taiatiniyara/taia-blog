@@ -113,15 +113,19 @@ export async function savePost(formData: FormData) {
     revalidatePath("/admin")
     revalidatePath(`/blog/${finalSlug}`)
 
+    let emailed: number | undefined
     const shouldSendEmail = formData.get("sendEmail") === "true"
     if (shouldSendEmail && published === 1 && isEmailConfigured()) {
-      sendPostToSubscribers(finalSlug).then(
-        (result) => console.log("[savePost] Sent to %d subscribers", result.total),
-        (err) => console.error("[savePost] Send failed:", err instanceof Error ? err.message : String(err)),
-      )
+      try {
+        const result = await sendPostToSubscribers(finalSlug)
+        emailed = result.total
+        console.log("[savePost] Sent to %d subscribers", result.total)
+      } catch (err) {
+        console.error("[savePost] Send failed:", err instanceof Error ? err.message : String(err))
+      }
     }
 
-    return { id: postId }
+    return { id: postId, emailed }
   } catch (err) {
     console.error("[savePost] ERROR:", err instanceof Error ? err.message : String(err))
     console.error("[savePost] STACK:", err instanceof Error ? err.stack : "")

@@ -31,6 +31,8 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
   const [series, setSeries] = useState(post?.series ?? "")
   const [published, setPublished] = useState(post?.published === 1)
   const [saving, setSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<string | null>(null)
+  const [emailResult, setEmailResult] = useState<number | null>(null)
   const [seriesOpen, setSeriesOpen] = useState(false)
   const [seriesHighlight, setSeriesHighlight] = useState(-1)
   const slugManualRef = useRef(false)
@@ -48,9 +50,15 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
     setSlug(value)
   }
 
+  function nowTimestamp() {
+    return new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+  }
+
   async function handleSave(publishOverride?: boolean, sendEmail = false) {
     if (!formRef.current) return
     setSaving(true)
+    setSaveStatus(null)
+    setEmailResult(null)
     try {
       const fd = new FormData(formRef.current)
       if (!fd.get("slug")) {
@@ -76,7 +84,15 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
         const finalSlug = (fd.get("slug") as string) || generateSlug(fd.get("title") as string)
         window.history.replaceState(null, "", `/admin?edit=${finalSlug}`)
       }
+      if (publishOverride === true) {
+        setPublished(true)
+        setEmailResult(result.emailed ?? null)
+      } else if (publishOverride === false) {
+        setPublished(false)
+      }
+      setSaveStatus(`Saved at ${nowTimestamp()}`)
     } catch (err) {
+      setSaveStatus("Save failed")
       console.error("Save failed:", err)
     } finally {
       setSaving(false)
@@ -98,6 +114,17 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
     return () => clearInterval(interval)
   }, [isNew])
 
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+        e.preventDefault()
+        saveRef.current()
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [])
+
   async function handleDelete() {
     if (!post?.id) return
     if (!confirm("Delete this post?")) return
@@ -108,17 +135,19 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
     router.refresh()
   }
 
+  const formId = savedId ?? post?.id
+
   return (
     <form
       ref={formRef}
-      className="space-y-6"
+      className="max-w-3xl mx-auto space-y-6"
       onSubmit={(e) => {
         e.preventDefault()
         handleSave()
       }}
     >
       <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {!isNew && (
             <button
               type="button"
@@ -128,12 +157,12 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
               Delete
             </button>
           )}
-
+          <StatusBadge published={published} />
         </div>
         <div className="flex items-center gap-3">
-          {saving && (
-            <span className="text-xs text-neutral-400">Saving...</span>
-          )}
+          <span className="text-xs text-neutral-400 min-w-[80px] text-right">
+            {saving ? "Saving..." : saveStatus}
+          </span>
           <button
             type="button"
             onClick={async () => {
@@ -150,7 +179,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
             type="submit"
             className="px-4 py-2 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200"
           >
-            {isNew ? "Save Draft" : "Save"}
+            {formId ? "Save" : "Save Draft"}
           </button>
           <button
             type="button"
@@ -161,6 +190,13 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
           </button>
         </div>
       </div>
+
+      {emailResult !== null && (
+        <div className="text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-900 rounded-lg px-4 py-2">
+          Published{emailResult > 0 ? ` — sent to ${emailResult} subscriber${emailResult === 1 ? "" : "s"}` : ""}.
+        </div>
+      )}
+
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1 text-neutral-700 dark:text-neutral-300">
@@ -304,17 +340,6 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
             )
           })()}
         </div>
-
-        <label className="flex items-center gap-2 text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            name="published"
-            checked={published}
-            onChange={(e) => setPublished(e.target.checked)}
-            className="rounded"
-          />
-          <span className="text-neutral-700 dark:text-neutral-300">Published</span>
-        </label>
       </div>
 
       <div>
@@ -331,5 +356,19 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
 
       <input type="hidden" name="id" value={post?.id ?? savedId ?? ""} />
     </form>
+  )
+}
+
+function StatusBadge({ published }: { published: boolean }) {
+  return (
+    <span
+      className={`text-xs px-2 py-0.5 rounded-full ${
+        published
+          ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400"
+          : "bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400"
+      }`}
+    >
+      {published ? "Published" : "Draft"}
+    </span>
   )
 }
