@@ -28,9 +28,11 @@ type EditingPost = {
 export function AdminPageClient({
   posts,
   editingPost,
+  existingSeries,
 }: {
   posts: Post[]
   editingPost: EditingPost
+  existingSeries: string[]
 }) {
   const [editMode, setEditMode] = useState(!!editingPost)
 
@@ -61,7 +63,7 @@ export function AdminPageClient({
             &larr; Back to list
           </Link>
         </div>
-        <PostForm post={postData} />
+        <PostForm post={postData} existingSeries={existingSeries} />
       </div>
     )
   }

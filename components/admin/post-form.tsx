@@ -23,7 +23,7 @@ function generateSlug(title: string): string {
     .slice(0, 80)
 }
 
-export function PostForm({ post }: { post?: PostData }) {
+export function PostForm({ post, existingSeries }: { post?: PostData; existingSeries: string[] }) {
   const router = useRouter()
   const isNew = !post?.id
 
@@ -182,9 +182,15 @@ export function PostForm({ post }: { post?: PostData }) {
             type="text"
             value={series}
             onChange={(e) => setSeries(e.target.value)}
+            list="series-list"
             className="w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600"
             placeholder="e.g. My Thoughts on Philosophy"
           />
+          <datalist id="series-list">
+            {existingSeries.map((s) => (
+              <option key={s} value={s} />
+            ))}
+          </datalist>
         </div>
 
         <label className="flex items-center gap-2 text-sm cursor-pointer">
