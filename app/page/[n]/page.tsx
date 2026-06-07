@@ -1,43 +1,9 @@
 import Link from "next/link"
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
-import { getPublishedPosts, totalPages } from "@/lib/posts"
+import { getPublishedPosts, totalPages, loadExcerpts } from "@/lib/posts"
 import { PostCard } from "@/components/post-card"
 import { PageWrapper } from "@/components/page-wrapper"
-import { loadContent } from "@/lib/content-store"
 import { notFound } from "next/navigation"
-
-async function loadExcerpts(
-  posts: Awaited<ReturnType<typeof getPublishedPosts>>,
-): Promise<Map<string, string | null>> {
-  const excerpts = new Map<string, string | null>()
-  const results = await Promise.allSettled(
-    posts.map(async (post) => {
-      const content = await loadContent(post.slug)
-      if (!content) return { slug: post.slug, excerpt: null }
-      return { slug: post.slug, excerpt: extractText(content) }
-    }),
-  )
-  for (const result of results) {
-    if (result.status === "fulfilled") {
-      excerpts.set(result.value.slug, result.value.excerpt)
-    }
-  }
-  return excerpts
-}
-
-function extractText(content: Record<string, unknown>): string {
-  const walk = (node: unknown): string => {
-    if (typeof node === "string") return node
-    if (Array.isArray(node)) return node.map(walk).join(" ")
-    if (node && typeof node === "object" && "text" in node)
-      return String((node as Record<string, unknown>).text)
-    if (node && typeof node === "object" && "content" in node)
-      return walk((node as Record<string, unknown>).content)
-    return ""
-  }
-  const text = walk(content)
-  return text.replace(/\s+/g, " ").trim().slice(0, 200).replace(/\s+\S*$/, "") || ""
-}
 
 export default async function PaginatedPage({
   params,

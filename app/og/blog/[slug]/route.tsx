@@ -3,27 +3,9 @@ import { getPostBySlugPublished } from "@/lib/posts"
 import { formatDate } from "@/lib/format-date"
 import { loadContent } from "@/lib/content-store"
 import { loadGoogleFont } from "@/lib/og-font"
+import { extractText } from "@/lib/utils"
 
 export const runtime = "nodejs"
-
-function extractDescription(
-  content: Record<string, unknown> | null,
-  fallback: string,
-): string {
-  if (!content) return fallback
-  const extract = (node: unknown): string => {
-    if (typeof node === "string") return node
-    if (Array.isArray(node)) return node.map(extract).join(" ")
-    if (node && typeof node === "object" && "text" in node)
-      return String((node as Record<string, unknown>).text)
-    if (node && typeof node === "object" && "content" in node)
-      return extract((node as Record<string, unknown>).content)
-    return ""
-  }
-  const text = extract((content as Record<string, unknown>).content)
-  const clean = text.replace(/\s+/g, " ").trim()
-  return clean.slice(0, 200).replace(/\s+\S*$/, "") || fallback
-}
 
 export async function GET(
   _request: Request,
@@ -34,7 +16,7 @@ export async function GET(
   if (!post) return new Response("Not found", { status: 404 })
 
   const content = await loadContent(slug)
-  const description = extractDescription(content, "")
+  const description = extractText(content, 200)
   const date = formatDate(post.createdAt)
   const siteName = "Taia's Blog"
 

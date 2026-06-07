@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation"
-import { getPostBySlugPublished, getPostBySlug, getAdjacentPosts, getPublishedPosts } from "@/lib/posts"
+import { getPostBySlugPublished, getPostBySlug, getAdjacentPosts, getPublishedPosts, getSeriesPosts } from "@/lib/posts"
 import { formatDate } from "@/lib/format-date"
 import { PostNavigation } from "@/components/post-navigation"
 import { ShareButtons } from "@/components/share-buttons"
 import { loadContent } from "@/lib/content-store"
 import { renderTiptapJSON } from "@/lib/tiptap-renderer"
-import { getSeriesPosts } from "@/lib/posts"
+import { extractText, getSiteUrl, splitTags } from "@/lib/utils"
 import Link from "next/link"
 import { LuChevronLeft, LuChevronRight, LuCalendar, LuList } from "react-icons/lu"
 import type { Metadata } from "next"
@@ -23,9 +23,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {}
 
   const content = await loadContent(slug)
-  const description = extractDescription(content, post.title)
+  const description = extractText(content, 160) || post.title
 
-  const baseUrl = process.env.SITE_URL ?? "http://localhost:3000"
+  const baseUrl = getSiteUrl()
 
   return {
     title: post.title,
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       modifiedTime: post.updatedAt,
       url: `${baseUrl}/blog/${post.slug}`,
       images: [{ url: `${baseUrl}/og/blog/${post.slug}`, width: 1200, height: 630, type: "image/png" }],
-      tags: post.tags?.split(",").map((t) => t.trim()).filter(Boolean),
+      tags: splitTags(post.tags),
     },
     twitter: {
       card: "summary_large_image",
@@ -51,23 +51,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [{ url: `${baseUrl}/og/blog/${post.slug}`, width: 1200, height: 630 }],
     },
   }
-}
-
-function extractDescription(
-  content: Record<string, unknown> | null,
-  fallback: string,
-): string {
-  if (!content) return fallback
-  const extract = (node: unknown): string => {
-    if (typeof node === "string") return node
-    if (Array.isArray(node)) return node.map(extract).join(" ")
-    if (node && typeof node === "object" && "text" in node) return String((node as Record<string, unknown>).text)
-    if (node && typeof node === "object" && "content" in node) return extract((node as Record<string, unknown>).content)
-    return ""
-  }
-  const text = extract((content as Record<string, unknown>).content)
-  const clean = text.replace(/\s+/g, " ").trim()
-  return clean.slice(0, 160).replace(/\s+\S*$/, "") || fallback
 }
 
 export default async function PostPage({ params, searchParams }: Props) {
@@ -92,9 +75,8 @@ export default async function PostPage({ params, searchParams }: Props) {
   const contentJSON = await loadContent(slug)
   const contentHTML = contentJSON ? renderTiptapJSON(contentJSON) : null
 
-  const tags = post.tags
-    ? post.tags.split(",").map((t) => t.trim()).filter(Boolean)
-    : []
+  const tags = splitTags(post.tags)
+  const baseUrl = getSiteUrl()
 
   return (
     <div className="mx-auto max-w-5xl lg:grid lg:grid-cols-[1fr_280px] lg:gap-10">
@@ -112,7 +94,7 @@ export default async function PostPage({ params, searchParams }: Props) {
               "@type": "Person",
               name: "Taia",
             },
-            url: `${process.env.SITE_URL ?? "http://localhost:3000"}/blog/${post.slug}`,
+            url: `${baseUrl}/blog/${post.slug}`,
             ...(tags.length > 0 && { keywords: tags.join(", ") }),
           }),
         }}
@@ -156,7 +138,7 @@ export default async function PostPage({ params, searchParams }: Props) {
       </div>
 
       <ShareButtons
-        url={`${process.env.SITE_URL ?? "http://localhost:3000"}/blog/${post.slug}`}
+        url={`${baseUrl}/blog/${post.slug}`}
         title={post.title}
       />
       <PostNavigation previous={previous} next={next} />

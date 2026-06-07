@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react"
 import { PostEditor } from "./post-editor"
 import { savePost, deletePost, getPreviewUrl, sendPostToSubscribers } from "@/lib/actions"
 import { useRouter } from "next/navigation"
+import { generateSlug } from "@/lib/utils"
 
 type PostData = {
   id?: number
@@ -15,13 +16,6 @@ type PostData = {
   content?: Record<string, unknown> | null
 }
 
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 80)
-}
 
 export function PostForm({ post, existingSeries }: { post?: PostData; existingSeries: string[] }) {
   const router = useRouter()

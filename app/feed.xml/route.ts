@@ -1,6 +1,7 @@
-import { db } from "@/db/client";
-import { posts } from "@/db/schema";
-import { and, eq, isNull, desc } from "drizzle-orm";
+import { db } from "@/db/client"
+import { posts } from "@/db/schema"
+import { and, eq, isNull, desc } from "drizzle-orm"
+import { getSiteUrl } from "@/lib/utils"
 
 export async function GET() {
   const publishedPosts = await db
@@ -13,9 +14,9 @@ export async function GET() {
     .where(and(eq(posts.published, 1), isNull(posts.deletedAt)))
     .orderBy(desc(posts.createdAt))
     .limit(20)
-    .all();
+    .all()
 
-  const siteUrl = process.env.SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl()
 
   const items = publishedPosts
     .map(

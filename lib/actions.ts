@@ -9,20 +9,13 @@ import { uploadToR2 } from "@/lib/r2-client"
 import { auth } from "@/lib/auth"
 import { sendEmail, isEmailConfigured } from "@/lib/email"
 import { postEmailTemplate } from "@/lib/email-template"
+import { generateSlug, extractText, getSiteUrl } from "@/lib/utils"
 
 async function requireAuth() {
   const session = await auth()
   if (!session?.user || session.user.name?.toLowerCase() !== process.env.ADMIN_GITHUB_USER?.toLowerCase()) {
     throw new Error("Unauthorized")
   }
-}
-
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 80)
 }
 
 export async function savePost(formData: FormData) {
@@ -163,9 +156,24 @@ export async function uploadImage(formData: FormData): Promise<string> {
   if (!file) throw new Error("No file provided")
 
   const buffer = Buffer.from(await file.arrayBuffer())
-  const ext = file.name.split(".").filter(Boolean).pop()?.toLowerCase() || file.type.split("/").pop() || "bin"
-  const key = `images/${crypto.randomUUID()}.${ext}`
-  const url = await uploadToR2(key, buffer, file.type || "image/octet-stream")
+
+  let uploadBuffer: Buffer
+  let contentType: string
+  let keyExt: string
+
+  try {
+    const sharp = (await import("sharp")).default
+    uploadBuffer = await sharp(buffer).webp({ quality: 85 }).toBuffer()
+    contentType = "image/webp"
+    keyExt = "webp"
+  } catch {
+    uploadBuffer = buffer
+    contentType = file.type || "image/octet-stream"
+    keyExt = file.name.split(".").filter(Boolean).pop()?.toLowerCase() || file.type.split("/").pop() || "bin"
+  }
+
+  const key = `images/${crypto.randomUUID()}.${keyExt}`
+  const url = await uploadToR2(key, uploadBuffer, contentType)
 
   console.error("[uploadImage] %s (%d bytes) → %s", file.name, file.size, url)
   return url
@@ -175,8 +183,7 @@ export async function getPreviewUrl(slug: string): Promise<string> {
   await requireAuth()
 
   const token = process.env.PREVIEW_TOKEN ?? ""
-  const siteUrl = process.env.SITE_URL ?? "http://localhost:3000"
-  return `${siteUrl}/blog/${slug}?preview=${token}`
+  return `${getSiteUrl()}/blog/${slug}?preview=${token}`
 }
 
 export async function subscribe(formData: FormData) {
@@ -211,7 +218,7 @@ export async function subscribe(formData: FormData) {
       .run()
   }
 
-  const siteUrl = process.env.SITE_URL ?? "http://localhost:3000"
+  const siteUrl = getSiteUrl()
   const confirmUrl = `${siteUrl}/subscribe/confirm?token=${token}`
 
   await sendEmail({
@@ -282,7 +289,7 @@ export async function sendPostToSubscribers(slug: string) {
   if (!post) throw new Error("Post not found")
 
   const content = await loadContent(slug)
-  const excerpt = extractEmailExcerpt(content)
+  const excerpt = extractText(content, 280)
 
   const subs = await db
     .select()
@@ -292,7 +299,7 @@ export async function sendPostToSubscribers(slug: string) {
 
   if (subs.length === 0) throw new Error("No confirmed subscribers")
 
-  const siteUrl = process.env.SITE_URL ?? "http://localhost:3000"
+  const siteUrl = getSiteUrl()
   let sent = 0
   let failed = 0
 
@@ -314,21 +321,4 @@ export async function sendPostToSubscribers(slug: string) {
   }
 
   return { sent, failed, total: subs.length }
-}
-
-function extractEmailExcerpt(
-  content: Record<string, unknown> | null,
-): string {
-  if (!content) return ""
-  const walk = (node: unknown): string => {
-    if (typeof node === "string") return node
-    if (Array.isArray(node)) return node.map(walk).join(" ")
-    if (node && typeof node === "object" && "text" in node)
-      return String((node as Record<string, unknown>).text)
-    if (node && typeof node === "object" && "content" in node)
-      return walk((node as Record<string, unknown>).content)
-    return ""
-  }
-  const text = walk(content)
-  return text.replace(/\s+/g, " ").trim().slice(0, 280).replace(/\s+\S*$/, "") || ""
 }

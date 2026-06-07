@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { LuChevronRight } from "react-icons/lu"
-import { PostList } from "@/components/post-list"
+import { PostCard } from "@/components/post-card"
 import { PageWrapper } from "@/components/page-wrapper"
 
 export const dynamic = "force-dynamic"
@@ -27,7 +27,17 @@ export default async function TagPage({
         <h1 className="text-xl font-semibold mb-6">
           Posts tagged &ldquo;{decodedTag}&rdquo;
         </h1>
-        <PostList posts={posts} />
+        {posts.length === 0 ? (
+          <div className="py-12 text-center text-neutral-500 dark:text-neutral-400">
+            No posts yet.
+          </div>
+        ) : (
+          <div>
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </div>
+        )}
         {hasMore && (
           <div className="mt-8 text-center">
             <Link

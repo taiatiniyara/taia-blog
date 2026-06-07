@@ -2,6 +2,7 @@ import Link from "next/link"
 import { LuTag, LuChevronRight } from "react-icons/lu"
 import type { Post } from "@/lib/posts"
 import { formatDate } from "@/lib/format-date"
+import { splitTags } from "@/lib/utils"
 
 export function PostCard({
   post,
@@ -12,9 +13,7 @@ export function PostCard({
   compact?: boolean
   excerpt?: string
 }) {
-  const tags = post.tags
-    ? post.tags.split(",").map((t) => t.trim()).filter(Boolean)
-    : []
+  const tags = splitTags(post.tags)
 
   return (
     <article className={compact ? "" : "py-6 border-b border-neutral-100 dark:border-neutral-800 first:pt-0 last:border-0"}>

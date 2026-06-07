@@ -1,6 +1,8 @@
 import { db } from "@/db/client"
 import { posts } from "@/db/schema"
 import { eq, and, isNull, like, sql, desc, asc } from "drizzle-orm"
+import { loadContent } from "@/lib/content-store"
+import { extractText } from "@/lib/utils"
 
 const POSTS_PER_PAGE = 10
 
@@ -38,10 +40,10 @@ export async function getPostBySlugPublished(slug: string) {
 }
 
 export async function getPostBySlugWithPreview(slug: string, previewToken: string) {
-  if (previewToken !== process.env.PREVIEW_TOKEN) {
-    return await getPostBySlugPublished(slug)
+  if (previewToken === process.env.PREVIEW_TOKEN) {
+    return await getPostBySlug(slug)
   }
-  return await getPostBySlug(slug)
+  return await getPostBySlugPublished(slug)
 }
 
 export async function countPublishedPosts() {
@@ -137,11 +139,6 @@ export async function getSeriesPosts(seriesName: string): Promise<SeriesPost[]> 
     .all()
 }
 
-export async function getSeriesForPost(slug: string): Promise<string | null> {
-  const post = await getPostBySlugPublished(slug)
-  return post?.series ?? null
-}
-
 export async function getAdjacentPosts(slug: string) {
   const post = await getPostBySlugPublished(slug)
   if (!post) return { previous: null, next: null }
@@ -158,4 +155,22 @@ export async function getAdjacentPosts(slug: string) {
   const next = idx > 0 ? allPosts[idx - 1] : null
 
   return { previous, next }
+}
+
+export async function loadExcerpts(
+  posts: Awaited<ReturnType<typeof getPublishedPosts>>,
+): Promise<Map<string, string | null>> {
+  const excerpts = new Map<string, string | null>()
+  const results = await Promise.allSettled(
+    posts.map(async (post) => {
+      const content = await loadContent(post.slug)
+      return { slug: post.slug, excerpt: content ? extractText(content, 200) : null }
+    }),
+  )
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      excerpts.set(result.value.slug, result.value.excerpt)
+    }
+  }
+  return excerpts
 }

@@ -4,6 +4,7 @@ import { Geist, Geist_Mono, Source_Serif_4 } from "next/font/google"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Breadcrumbs } from "@/components/breadcrumbs"
+import { getSiteUrl } from "@/lib/utils"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -21,7 +22,7 @@ const sourceSerif4 = Source_Serif_4({
   subsets: ["latin"],
 })
 
-const baseUrl = process.env.SITE_URL ?? "http://localhost:3000"
+const baseUrl = getSiteUrl()
 
 export const metadata: Metadata = {
   title: {

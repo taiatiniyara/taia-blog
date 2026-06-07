@@ -1,6 +1,7 @@
 import { formatDate } from "./format-date"
+import { getSiteUrl } from "./utils"
 
-const baseUrl = process.env.SITE_URL ?? "http://localhost:3000"
+const baseUrl = getSiteUrl()
 const accent = "#171717"
 const muted = "#6b7280"
 const bg = "#fafafa"
