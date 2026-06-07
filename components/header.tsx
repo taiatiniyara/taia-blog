@@ -1,8 +1,12 @@
 import Link from "next/link"
-import { LuLayers, LuUser } from "react-icons/lu"
+import { LuLayers, LuUser, LuTerminal, LuLogOut } from "react-icons/lu"
 import { ThemeToggle } from "./theme-toggle"
+import { auth, signOut } from "@/lib/auth"
 
-export function Header() {
+export async function Header() {
+  const session = await auth()
+  const isAdmin = session?.user?.name?.toLowerCase() === process.env.ADMIN_GITHUB_USER?.toLowerCase()
+
   return (
     <header className="border-b border-neutral-200 dark:border-neutral-800">
       <nav className="mx-auto max-w-5xl px-4 py-3 sm:py-4 flex items-center justify-between">
@@ -18,6 +22,28 @@ export function Header() {
             <LuUser size={14} />
             About
           </Link>
+          {isAdmin && (
+            <>
+              <Link href="/admin" className="hover:text-neutral-600 dark:hover:text-neutral-400 inline-flex items-center gap-1">
+                <LuTerminal size={14} />
+                Admin
+              </Link>
+              <form
+                action={async () => {
+                  "use server"
+                  await signOut({ redirectTo: "/" })
+                }}
+              >
+                <button
+                  type="submit"
+                  className="hover:text-neutral-600 dark:hover:text-neutral-400 inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <LuLogOut size={14} />
+                  Logout
+                </button>
+              </form>
+            </>
+          )}
           <ThemeToggle />
         </div>
       </nav>

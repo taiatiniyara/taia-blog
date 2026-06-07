@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { getPostBySlugPublished, getPostBySlug, getAdjacentPosts, getPublishedPosts } from "@/lib/posts"
 import { formatDate } from "@/lib/format-date"
 import { PostNavigation } from "@/components/post-navigation"
+import { ShareButtons } from "@/components/share-buttons"
 import { loadContent } from "@/lib/content-store"
 import { renderTiptapJSON } from "@/lib/tiptap-renderer"
 import { getSeriesPosts } from "@/lib/posts"
@@ -155,6 +156,10 @@ export default async function PostPage({ params, searchParams }: Props) {
         )}
       </div>
 
+      <ShareButtons
+        url={`${process.env.SITE_URL ?? "http://localhost:3000"}/blog/${post.slug}`}
+        title={post.title}
+      />
       <PostNavigation previous={previous} next={next} />
     </article>
 
