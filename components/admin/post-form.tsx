@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { PostEditor } from "./post-editor"
 import { savePost, deletePost, getPreviewUrl } from "@/lib/actions"
 import { useRouter } from "next/navigation"
@@ -21,36 +21,20 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
   const router = useRouter()
   const isNew = !post?.id
 
+  const formRef = useRef<HTMLFormElement>(null)
+  const contentRef = useRef<Record<string, unknown> | null>(post?.content ?? null)
+
   const [title, setTitle] = useState(post?.title ?? "")
   const [slug, setSlug] = useState(post?.slug ?? "")
   const [tags, setTags] = useState(post?.tags ?? "")
   const [series, setSeries] = useState(post?.series ?? "")
   const [published, setPublished] = useState(post?.published === 1)
-  const [content, setContent] = useState<Record<string, unknown> | null>(
-    post?.content ?? null,
-  )
   const [saving, setSaving] = useState(false)
   const [seriesOpen, setSeriesOpen] = useState(false)
   const [seriesHighlight, setSeriesHighlight] = useState(-1)
   const slugManualRef = useRef(false)
   const seriesInputRef = useRef<HTMLInputElement>(null)
   const seriesListRef = useRef<HTMLUListElement>(null)
-
-  const titleRef = useRef(title)
-  const slugRef = useRef(slug)
-  const tagsRef = useRef(tags)
-  const seriesRef = useRef(series)
-  const publishedRef = useRef(published)
-  const contentRef = useRef(content)
-  const postRef = useRef(post)
-
-  useEffect(() => { titleRef.current = title }, [title])
-  useEffect(() => { slugRef.current = slug }, [slug])
-  useEffect(() => { tagsRef.current = tags }, [tags])
-  useEffect(() => { seriesRef.current = series }, [series])
-  useEffect(() => { publishedRef.current = published }, [published])
-  useEffect(() => { contentRef.current = content }, [content])
-  useEffect(() => { postRef.current = post }, [post])
 
   useEffect(() => {
     if (isNew && !slugManualRef.current && title) {
@@ -63,37 +47,28 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
     setSlug(value)
   }
 
-  const doSave = useCallback(async (publishOverride?: boolean) => {
+  async function handleSave(publishOverride?: boolean) {
+    if (!formRef.current) return
     setSaving(true)
     try {
-      const currentTitle = titleRef.current
-      const currentSlug = slugRef.current
-      const currentTags = tagsRef.current
-      const currentSeries = seriesRef.current
-      const currentPublished = publishedRef.current
-      const currentContent = contentRef.current
-      const currentPost = postRef.current
-
-      const formData = new FormData()
-      if (currentPost?.id) formData.set("id", String(currentPost.id))
-      formData.set("title", currentTitle)
-      formData.set("slug", currentSlug || generateSlug(currentTitle))
-      formData.set("tags", currentTags)
-      formData.set("series", currentSeries)
-      formData.set(
+      const fd = new FormData(formRef.current)
+      if (!fd.get("slug")) {
+        fd.set("slug", generateSlug(fd.get("title") as string))
+      }
+      fd.set(
         "published",
         publishOverride !== undefined
           ? publishOverride
             ? "1"
             : "0"
-          : currentPublished
+          : published
             ? "1"
             : "0",
       )
-      formData.set("content", currentContent ? JSON.stringify(currentContent) : "")
-      const result = await savePost(formData)
-      if (!currentPost?.id && result?.id) {
-        const finalSlug = currentSlug || generateSlug(currentTitle)
+      fd.set("content", contentRef.current ? JSON.stringify(contentRef.current) : "")
+      const result = await savePost(fd)
+      if (!post?.id && result?.id) {
+        const finalSlug = (fd.get("slug") as string) || generateSlug(fd.get("title") as string)
         window.history.replaceState(null, "", `/admin?edit=${finalSlug}`)
       }
     } catch (err) {
@@ -101,16 +76,18 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
     } finally {
       setSaving(false)
     }
-  }, [])
+  }
 
-  const doSaveRef = useRef(doSave)
-  useEffect(() => { doSaveRef.current = doSave }, [doSave])
+  const saveRef = useRef(handleSave)
+  useEffect(() => { saveRef.current = handleSave })
 
   useEffect(() => {
     if (!isNew) return
     const interval = setInterval(() => {
-      if (titleRef.current && contentRef.current) {
-        doSaveRef.current()
+      if (!formRef.current) return
+      const fd = new FormData(formRef.current)
+      if (fd.get("title") && contentRef.current) {
+        saveRef.current()
       }
     }, 30000)
     return () => clearInterval(interval)
@@ -127,7 +104,14 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
   }
 
   return (
-    <div className="space-y-6">
+    <form
+      ref={formRef}
+      className="space-y-6"
+      onSubmit={(e) => {
+        e.preventDefault()
+        handleSave()
+      }}
+    >
       <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-sm border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {!isNew && (
@@ -148,7 +132,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
           <button
             type="button"
             onClick={async () => {
-              await doSave()
+              await handleSave()
               const finalSlug = slug || generateSlug(title)
               const url = await getPreviewUrl(finalSlug)
               window.open(url, "_blank")
@@ -158,8 +142,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
             Preview
           </button>
           <button
-            type="button"
-            onClick={() => doSave()}
+            type="submit"
             className="px-4 py-2 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200"
           >
             {isNew ? "Save Draft" : "Save"}
@@ -173,6 +156,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
           </label>
           <input
             type="text"
+            name="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600"
@@ -186,6 +170,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
           </label>
           <input
             type="text"
+            name="slug"
             value={slug}
             onChange={(e) => handleSlugChange(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 font-mono"
@@ -200,6 +185,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
           </label>
           <input
             type="text"
+            name="tags"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600"
@@ -215,6 +201,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
           <input
             ref={seriesInputRef}
             type="text"
+            name="series"
             value={series}
             onChange={(e) => {
               setSeries(e.target.value)
@@ -309,6 +296,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
         <label className="flex items-center gap-2 text-sm cursor-pointer">
           <input
             type="checkbox"
+            name="published"
             checked={published}
             onChange={(e) => setPublished(e.target.checked)}
             className="rounded"
@@ -323,9 +311,13 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
         </label>
         <PostEditor
           initialContent={post?.content ?? undefined}
-          onChange={setContent}
+          onChange={(json) => {
+            contentRef.current = json
+          }}
         />
       </div>
-    </div>
+
+      {post?.id && <input type="hidden" name="id" value={post.id} />}
+    </form>
   )
 }
