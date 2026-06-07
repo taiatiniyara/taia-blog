@@ -7,7 +7,7 @@ import { loadContent } from "@/lib/content-store"
 import { renderTiptapJSON } from "@/lib/tiptap-renderer"
 import { extractText, getSiteUrl, splitTags } from "@/lib/utils"
 import Link from "next/link"
-import { LuChevronLeft, LuChevronRight, LuCalendar, LuList } from "react-icons/lu"
+import { LuChevronLeft, LuChevronRight, LuCalendar, LuList, LuLayers } from "react-icons/lu"
 import type { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
@@ -109,6 +109,18 @@ export default async function PostPage({ params, searchParams }: Props) {
         <div className="mt-3 flex items-center gap-3 text-sm text-neutral-500 dark:text-neutral-400">
           <LuCalendar size={14} />
           <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
+          {post.series && (
+            <>
+              <span aria-hidden="true">&middot;</span>
+              <Link
+                href={`/series/${encodeURIComponent(post.series)}`}
+                className="inline-flex items-center gap-1 hover:text-neutral-900 dark:hover:text-neutral-100"
+              >
+                <LuLayers size={14} />
+                <span>{post.series}</span>
+              </Link>
+            </>
+          )}
         </div>
         {tags.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
@@ -181,8 +193,6 @@ async function SeriesNav({
   currentSlug: string
 }) {
   const posts = await getSeriesPosts(series)
-  if (posts.length < 2) return null
-
   const currentIndex = posts.findIndex((p) => p.slug === currentSlug)
   const previous = currentIndex > 0 ? posts[currentIndex - 1] : null
   const next = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null

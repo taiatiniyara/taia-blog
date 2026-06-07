@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { LuTag, LuChevronRight } from "react-icons/lu"
+import { LuTag, LuChevronRight, LuLayers } from "react-icons/lu"
 import type { Post } from "@/lib/posts"
 import { formatDate } from "@/lib/format-date"
 import { splitTags } from "@/lib/utils"
@@ -24,6 +24,15 @@ export function PostCard({
       </Link>
       <div className="mt-1 flex items-center gap-3 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
         <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
+        {post.series && (
+          <Link
+            href={`/series/${encodeURIComponent(post.series)}`}
+            className="inline-flex items-center gap-1 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+          >
+            <LuLayers size={12} />
+            <span>{post.series}</span>
+          </Link>
+        )}
       </div>
       {excerpt && (
         <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed line-clamp-2">
