@@ -39,13 +39,13 @@ export const metadata: Metadata = {
     siteName: "Taia's Blog",
     title: "Taia's Blog",
     description: "Personal thoughts on things in general.",
-    images: [`${baseUrl}/og-image.svg`],
+    images: [{ url: `${baseUrl}/og`, width: 1200, height: 630, type: "image/png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Taia's Blog",
     description: "Personal thoughts on things in general.",
-    images: [`${baseUrl}/og-image.svg`],
+    images: [{ url: `${baseUrl}/og`, width: 1200, height: 630, type: "image/png" }],
   },
   robots: {
     index: true,

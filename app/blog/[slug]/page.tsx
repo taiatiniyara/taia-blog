@@ -26,7 +26,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = extractDescription(content, post.title)
 
   const baseUrl = process.env.SITE_URL ?? "http://localhost:3000"
-  const ogImage = `${baseUrl}/og-image.svg`
 
   return {
     title: post.title,
@@ -42,14 +41,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: post.createdAt,
       modifiedTime: post.updatedAt,
       url: `${baseUrl}/blog/${post.slug}`,
-      images: [{ url: ogImage, width: 1200, height: 630 }],
+      images: [{ url: `${baseUrl}/og/blog/${post.slug}`, width: 1200, height: 630, type: "image/png" }],
       tags: post.tags?.split(",").map((t) => t.trim()).filter(Boolean),
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description,
-      images: [ogImage],
+      images: [{ url: `${baseUrl}/og/blog/${post.slug}`, width: 1200, height: 630 }],
     },
   }
 }
