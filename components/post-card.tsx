@@ -22,15 +22,15 @@ export function PostCard({
           {post.title}
         </h2>
       </Link>
-      <div className="mt-1 flex items-center gap-3 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">
         <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
         {post.series && (
           <Link
             href={`/series/${encodeURIComponent(post.series)}`}
-            className="inline-flex items-center gap-1 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+            className="inline-flex items-center gap-1 max-w-[140px] sm:max-w-none truncate text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
           >
-            <LuLayers size={12} />
-            <span>{post.series}</span>
+            <LuLayers size={12} className="shrink-0" />
+            <span className="truncate">{post.series}</span>
           </Link>
         )}
       </div>

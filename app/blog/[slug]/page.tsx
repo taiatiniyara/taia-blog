@@ -106,7 +106,7 @@ export default async function PostPage({ params, searchParams }: Props) {
           </div>
         )}
         <h1 className="text-2xl sm:text-3xl font-bold leading-tight">{post.title}</h1>
-        <div className="mt-3 flex items-center gap-3 text-sm text-neutral-500 dark:text-neutral-400">
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
           <LuCalendar size={14} />
           <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
           {post.series && (
@@ -116,7 +116,7 @@ export default async function PostPage({ params, searchParams }: Props) {
                 href={`/series/${encodeURIComponent(post.series)}`}
                 className="inline-flex items-center gap-1 hover:text-neutral-900 dark:hover:text-neutral-100"
               >
-                <LuLayers size={14} />
+                <LuLayers size={14} className="shrink-0" />
                 <span>{post.series}</span>
               </Link>
             </>
