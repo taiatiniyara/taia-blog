@@ -112,6 +112,13 @@ export async function savePost(formData: FormData) {
     revalidatePath("/admin")
     revalidatePath(`/blog/${finalSlug}`)
 
+    if (!existingId && published === 1) {
+      sendPostToSubscribers(finalSlug).then(
+        (result) => console.error("[savePost] Auto-sent to %d subscribers", result.total),
+        (err) => console.error("[savePost] Auto-send failed:", err instanceof Error ? err.message : String(err)),
+      )
+    }
+
     return { id: postId }
   } catch (err) {
     console.error("[savePost] ERROR:", err instanceof Error ? err.message : String(err))
@@ -300,27 +307,25 @@ export async function sendPostToSubscribers(slug: string) {
   if (subs.length === 0) throw new Error("No confirmed subscribers")
 
   const siteUrl = getSiteUrl()
-  let sent = 0
-  let failed = 0
 
-  for (const sub of subs) {
-    const html = postEmailTemplate({
-      title: post.title,
-      slug: post.slug,
-      excerpt: excerpt || post.title,
-      date: post.createdAt,
-      unsubscribeUrl: `${siteUrl}/subscribe/unsubscribe?token=${sub.token}`,
-    })
-    const ok = await sendEmail({
-      to: sub.email,
-      subject: post.title,
-      html,
-    })
-    if (ok) sent++
-    else failed++
-  }
+  Promise.allSettled(
+    subs.map((sub) => {
+      const html = postEmailTemplate({
+        title: post.title,
+        slug: post.slug,
+        excerpt: excerpt || post.title,
+        date: post.createdAt,
+        unsubscribeUrl: `${siteUrl}/subscribe/unsubscribe?token=${sub.token}`,
+      })
+      return sendEmail({
+        to: sub.email,
+        subject: post.title,
+        html,
+      })
+    }),
+  )
 
-  return { sent, failed, total: subs.length }
+  return { total: subs.length }
 }
 
 export async function getAllSubscribers() {

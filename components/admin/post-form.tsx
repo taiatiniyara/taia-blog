@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react"
 import { PostEditor } from "./post-editor"
-import { savePost, deletePost, getPreviewUrl, sendPostToSubscribers } from "@/lib/actions"
+import { savePost, deletePost, getPreviewUrl } from "@/lib/actions"
 import { useRouter } from "next/navigation"
 import { generateSlug } from "@/lib/utils"
 
@@ -30,8 +30,6 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
     post?.content ?? null,
   )
   const [saving, setSaving] = useState(false)
-  const [sending, setSending] = useState(false)
-  const [sendResult, setSendResult] = useState<string | null>(null)
   const [seriesOpen, setSeriesOpen] = useState(false)
   const [seriesHighlight, setSeriesHighlight] = useState(-1)
   const slugManualRef = useRef(false)
@@ -141,31 +139,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
               Delete
             </button>
           )}
-          {!isNew && published && (
-            <button
-              type="button"
-              disabled={sending}
-              onClick={async () => {
-                setSending(true)
-                setSendResult(null)
-                try {
-                  const finalSlug = slug || generateSlug(title)
-                  const result = await sendPostToSubscribers(finalSlug)
-                  setSendResult(`Sent to ${result.sent} subscriber${result.sent !== 1 ? "s" : ""}.`)
-                } catch {
-                  setSendResult("Failed to send.")
-                } finally {
-                  setSending(false)
-                }
-              }}
-              className="px-3 py-1.5 text-sm text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg"
-            >
-              {sending ? "Sending..." : "Send to subscribers"}
-            </button>
-          )}
-          {sendResult && (
-            <span className="text-xs text-neutral-500">{sendResult}</span>
-          )}
+
         </div>
         <div className="flex items-center gap-3">
           {saving && (
