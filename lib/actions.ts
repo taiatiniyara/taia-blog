@@ -322,3 +322,66 @@ export async function sendPostToSubscribers(slug: string) {
 
   return { sent, failed, total: subs.length }
 }
+
+export async function getAllSubscribers() {
+  await requireAuth()
+
+  return await db
+    .select()
+    .from(subscribers)
+    .orderBy(desc(subscribers.createdAt))
+    .all()
+}
+
+export async function addSubscriber(formData: FormData) {
+  await requireAuth()
+
+  const email = (formData.get("email") as string)?.trim().toLowerCase()
+  if (!email || !email.includes("@")) {
+    throw new Error("Valid email required")
+  }
+
+  const existing = await db
+    .select()
+    .from(subscribers)
+    .where(eq(subscribers.email, email))
+    .get()
+
+  if (existing && existing.confirmed && !existing.unsubscribedAt) {
+    return { status: "already_subscribed" as const }
+  }
+
+  const token = crypto.randomUUID()
+  const now = new Date().toISOString()
+
+  if (existing) {
+    await db
+      .update(subscribers)
+      .set({ token, confirmed: 1, unsubscribedAt: null, createdAt: now })
+      .where(eq(subscribers.email, email))
+      .run()
+  } else {
+    await db
+      .insert(subscribers)
+      .values({ email, token, confirmed: 1, createdAt: now })
+      .run()
+  }
+
+  revalidatePath("/admin")
+  return { status: "added" as const, email }
+}
+
+export async function removeSubscriber(formData: FormData) {
+  await requireAuth()
+
+  const id = formData.get("id") as string
+  if (!id) throw new Error("Subscriber ID required")
+
+  await db
+    .update(subscribers)
+    .set({ unsubscribedAt: new Date().toISOString() })
+    .where(eq(subscribers.id, parseInt(id, 10)))
+    .run()
+
+  revalidatePath("/admin")
+}

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { PostForm } from "@/components/admin/post-form"
+import { SubscriberManager } from "@/components/admin/subscriber-manager"
 import { formatDate } from "@/lib/format-date"
 import Link from "next/link"
 
@@ -26,6 +27,14 @@ type EditingPost = {
   content: Record<string, unknown> | null
 } | null
 
+type Subscriber = {
+  id: number
+  email: string
+  confirmed: number | null
+  createdAt: string
+  unsubscribedAt: string | null
+}
+
 type SortField = "title" | "updatedAt" | "published"
 
 function SortIcon({ field, sortField, sortDir }: { field: SortField; sortField: SortField; sortDir: "asc" | "desc" }) {
@@ -37,10 +46,12 @@ export function AdminPageClient({
   posts,
   editingPost,
   existingSeries,
+  subscribers,
 }: {
   posts: Post[]
   editingPost: EditingPost
   existingSeries: string[]
+  subscribers: Subscriber[]
 }) {
   const [editMode, setEditMode] = useState(!!editingPost)
   const [search, setSearch] = useState("")
@@ -269,6 +280,8 @@ export function AdminPageClient({
           </div>
         </>
       )}
+
+      <SubscriberManager subscribers={subscribers} />
     </div>
   )
 }

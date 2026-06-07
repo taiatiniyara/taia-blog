@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
-import { getAllPosts } from "@/lib/actions"
+import { getAllPosts, getAllSubscribers } from "@/lib/actions"
 import { loadContent } from "@/lib/content-store"
 import { getAllSeries } from "@/lib/posts"
 import { AdminPageClient } from "./admin-page-client"
@@ -18,6 +18,7 @@ export default async function AdminPage({
   const { edit } = await searchParams
   const posts = await getAllPosts()
   const existingSeries = await getAllSeries()
+  const subscribers = await getAllSubscribers()
 
   let editingPost: {
     id: number
@@ -57,5 +58,5 @@ export default async function AdminPage({
     }
   }
 
-  return <AdminPageClient key={edit ?? "list"} posts={posts} editingPost={editingPost} existingSeries={existingSeries} />
+  return <AdminPageClient key={edit ?? "list"} posts={posts} editingPost={editingPost} existingSeries={existingSeries} subscribers={subscribers} />
 }
