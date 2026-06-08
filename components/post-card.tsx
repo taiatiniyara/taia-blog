@@ -8,15 +8,32 @@ export function PostCard({
   post,
   compact = false,
   excerpt,
+  firstImage,
 }: {
   post: Post
   compact?: boolean
   excerpt?: string
+  firstImage?: string | null
 }) {
   const tags = splitTags(post.tags)
 
   return (
-    <article className={compact ? "" : "py-6 border-b border-neutral-100 dark:border-neutral-800 first:pt-0 last:border-0"} aria-labelledby={`post-${post.slug}`}>
+    <article
+      className={compact ? "border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-hidden" : "py-6 border-b border-neutral-100 dark:border-neutral-800 first:pt-0 last:border-0"}
+      aria-labelledby={`post-${post.slug}`}
+    >
+      {compact && firstImage && (
+        <Link href={`/blog/${post.slug}`} className="block">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={firstImage}
+            alt=""
+            className="w-full h-48 object-cover"
+            loading="lazy"
+          />
+        </Link>
+      )}
+      <div className={compact ? "p-4" : ""}>
       <Link href={`/blog/${post.slug}`} className="group">
         <h2 id={`post-${post.slug}`} className="text-lg font-semibold leading-snug group-hover:text-neutral-600 dark:group-hover:text-neutral-400 transition-colors duration-150">
           {post.title}
@@ -60,6 +77,7 @@ export function PostCard({
       >
         Read more <LuChevronRight size={14} />
       </Link>
+      </div>
     </article>
   )
 }

@@ -16,7 +16,7 @@ export default async function HomePage({
   const sort = params.sort === "oldest" ? "oldest" : "newest"
   const posts = await getPublishedPosts(page, sort)
   const pages = await totalPages()
-  const excerpts = await loadExcerpts(posts)
+  const cardData = await loadExcerpts(posts)
 
   return (
     <PageWrapper>
@@ -53,7 +53,8 @@ export default async function HomePage({
               key={post.id}
               post={post}
               compact
-              excerpt={excerpts.get(post.slug) ?? undefined}
+              excerpt={cardData.get(post.slug)?.excerpt ?? undefined}
+              firstImage={cardData.get(post.slug)?.firstImage}
             />
           ))}
         </div>

@@ -2,7 +2,7 @@ import { db } from "@/db/client"
 import { posts } from "@/db/schema"
 import { eq, and, isNull, like, sql, desc, asc } from "drizzle-orm"
 import { loadContent } from "@/lib/content-store"
-import { extractText } from "@/lib/utils"
+import { extractText, extractFirstImage } from "@/lib/utils"
 
 const POSTS_PER_PAGE = 10
 
@@ -157,20 +157,32 @@ export async function getAdjacentPosts(slug: string) {
   return { previous, next }
 }
 
+export type PostCardData = {
+  excerpt: string | null
+  firstImage: string | null
+}
+
 export async function loadExcerpts(
   posts: Awaited<ReturnType<typeof getPublishedPosts>>,
-): Promise<Map<string, string | null>> {
-  const excerpts = new Map<string, string | null>()
+): Promise<Map<string, PostCardData>> {
+  const data = new Map<string, PostCardData>()
   const results = await Promise.allSettled(
     posts.map(async (post) => {
       const content = await loadContent(post.slug)
-      return { slug: post.slug, excerpt: content ? extractText(content, 200) : null }
+      return {
+        slug: post.slug,
+        excerpt: content ? extractText(content, 200) : null,
+        firstImage: content ? extractFirstImage(content) : null,
+      }
     }),
   )
   for (const result of results) {
     if (result.status === "fulfilled") {
-      excerpts.set(result.value.slug, result.value.excerpt)
+      data.set(result.value.slug, {
+        excerpt: result.value.excerpt,
+        firstImage: result.value.firstImage,
+      })
     }
   }
-  return excerpts
+  return data
 }

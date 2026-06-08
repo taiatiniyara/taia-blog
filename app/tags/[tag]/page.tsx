@@ -36,7 +36,7 @@ export default async function TagPage({
         ) : (
           <div>
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} excerpt={excerpts.get(post.slug) ?? undefined} />
+              <PostCard key={post.id} post={post} excerpt={excerpts.get(post.slug)?.excerpt ?? undefined} />
             ))}
           </div>
         )}

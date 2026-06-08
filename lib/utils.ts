@@ -34,3 +34,31 @@ export function extractText(
   const text = walk(content)
   return text.replace(/\s+/g, " ").trim().slice(0, maxLength).replace(/\s+\S*$/, "")
 }
+
+export function extractFirstImage(
+  content: Record<string, unknown> | null | undefined,
+): string | null {
+  if (!content) return null
+
+  const walk = (node: unknown): string | null => {
+    if (!node || typeof node !== "object") return null
+    const obj = node as Record<string, unknown>
+    if (obj.type === "image" && obj.attrs && typeof obj.attrs === "object") {
+      const attrs = obj.attrs as Record<string, unknown>
+      const src = attrs.src
+      if (typeof src === "string") return src
+    }
+    if ("content" in obj) {
+      const children = obj.content
+      if (Array.isArray(children)) {
+        for (const child of children) {
+          const result = walk(child)
+          if (result) return result
+        }
+      }
+    }
+    return null
+  }
+
+  return walk(content)
+}
