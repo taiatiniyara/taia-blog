@@ -93,7 +93,7 @@ export default async function RootLayout({
         >
           Skip to content
         </a>
-        <Header />
+        <Header pathname={pathname} />
         <main className="flex-1 px-4 py-8" id="main-content">
           <Breadcrumbs />
           {children}

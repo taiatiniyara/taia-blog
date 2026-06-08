@@ -25,21 +25,21 @@ export default async function HomePage({
         <div className="flex items-center gap-1 text-xs sm:text-sm">
           <Link
             href={`/?sort=newest${page > 1 ? `&page=${page}` : ""}`}
-            className={`px-2.5 sm:px-3 py-1 rounded-md ${
-              sort === "newest"
-                ? "bg-neutral-100 dark:bg-neutral-800 font-medium"
-                : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
-            }`}
+              className={`px-2.5 sm:px-3 py-1 rounded-md transition-colors duration-150 ${
+                sort === "newest"
+                  ? "bg-neutral-100 dark:bg-neutral-800 font-medium"
+                  : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+              }`}
           >
             Newest
           </Link>
           <Link
             href={`/?sort=oldest${page > 1 ? `&page=${page}` : ""}`}
-            className={`px-2.5 sm:px-3 py-1 rounded-md ${
-              sort === "oldest"
-                ? "bg-neutral-100 dark:bg-neutral-800 font-medium"
-                : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
-            }`}
+              className={`px-2.5 sm:px-3 py-1 rounded-md transition-colors duration-150 ${
+                sort === "oldest"
+                  ? "bg-neutral-100 dark:bg-neutral-800 font-medium"
+                  : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+              }`}
           >
             Oldest
           </Link>
@@ -67,7 +67,7 @@ export default async function HomePage({
         <div className="mt-12 text-center">
           <Link
             href={`/page/${page + 1}${sort === "oldest" ? "?sort=oldest" : ""}`}
-            className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 inline-flex items-center gap-1"
+            className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 inline-flex items-center gap-1 transition-colors duration-150"
           >
             Older Posts <LuChevronRight size={14} />
           </Link>

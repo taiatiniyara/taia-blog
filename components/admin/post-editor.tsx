@@ -5,6 +5,7 @@ import StarterKit from "@tiptap/starter-kit"
 import ImageExtension from "@tiptap/extension-image"
 import Typography from "@tiptap/extension-typography"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { LuLoader } from "react-icons/lu"
 import { uploadImage } from "@/lib/actions"
 
 type PostEditorProps = {
@@ -273,7 +274,10 @@ export function PostEditor({ initialContent, onChange }: PostEditorProps) {
           Img
         </ToolbarButton>
         {uploading && (
-          <span className="ml-2 text-xs text-neutral-400">Uploading...</span>
+          <span className="ml-2 text-xs text-neutral-400 inline-flex items-center gap-1">
+            <LuLoader size={12} className="animate-spin" />
+            Uploading...
+          </span>
         )}
         {uploadError && (
           <span className="ml-2 text-xs text-red-500">{uploadError}</span>
@@ -299,7 +303,7 @@ function ToolbarButton({
     <button
       type="button"
       onClick={onClick}
-      className={`px-2 py-1 text-sm rounded hover:bg-neutral-200 dark:hover:bg-neutral-700 ${
+      className={`px-2 py-1 text-sm rounded hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors duration-150 ${
         active ? "bg-neutral-200 dark:bg-neutral-700 font-semibold" : ""
       }`}
       aria-label={label}

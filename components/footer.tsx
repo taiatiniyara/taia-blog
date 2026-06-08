@@ -19,7 +19,7 @@ export function Footer() {
         </div>
         <div className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 flex items-center justify-between pt-4 border-t border-neutral-100 dark:border-neutral-800">
           <span>&copy; {year} Taia&apos;s Blog</span>
-          <Link href="/feed.xml" className="hover:text-neutral-800 dark:hover:text-neutral-200 inline-flex items-center gap-1">
+          <Link href="/feed.xml" className="hover:text-neutral-800 dark:hover:text-neutral-200 inline-flex items-center gap-1 transition-colors duration-150">
             <LuRss size={14} />
             RSS
           </Link>

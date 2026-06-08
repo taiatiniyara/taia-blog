@@ -76,7 +76,7 @@ export function SubscriberManager({ subscribers }: { subscribers: Subscriber[] }
         <button
           type="submit"
           disabled={isPending}
-          className="px-3 py-1.5 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 disabled:opacity-50"
+          className="px-3 py-1.5 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 disabled:opacity-50 transition-colors duration-150"
         >
           {isPending ? "Adding..." : "Add Subscriber"}
         </button>
@@ -93,7 +93,7 @@ export function SubscriberManager({ subscribers }: { subscribers: Subscriber[] }
       )}
 
       {subscribers.length === 0 ? (
-        <p className="text-neutral-500 dark:text-neutral-400 text-sm">No subscribers yet.</p>
+        <p className="py-8 text-center text-neutral-500 dark:text-neutral-400 text-sm">No subscribers yet.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-xs sm:text-sm">

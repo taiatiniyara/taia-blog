@@ -40,7 +40,7 @@ export default async function SeriesDetailPage({ params }: Props) {
             <div>
               <Link
                 href={`/blog/${post.slug}`}
-                className="text-neutral-900 dark:text-neutral-100 hover:text-neutral-600 dark:hover:text-neutral-400"
+                className="text-neutral-900 dark:text-neutral-100 hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors duration-150"
               >
                 {post.title}
               </Link>

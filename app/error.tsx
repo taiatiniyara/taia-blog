@@ -27,7 +27,7 @@ export default function Error({
         <div className="mt-6 flex items-center justify-center gap-4">
           <button
             onClick={reset}
-            className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+            className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors duration-150"
           >
             Try again
           </button>

@@ -16,9 +16,9 @@ export function PostCard({
   const tags = splitTags(post.tags)
 
   return (
-    <article className={compact ? "" : "py-6 border-b border-neutral-100 dark:border-neutral-800 first:pt-0 last:border-0"}>
+    <article className={compact ? "" : "py-6 border-b border-neutral-100 dark:border-neutral-800 first:pt-0 last:border-0"} aria-labelledby={`post-${post.slug}`}>
       <Link href={`/blog/${post.slug}`} className="group">
-        <h2 className="text-lg font-semibold leading-snug group-hover:text-neutral-600 dark:group-hover:text-neutral-400">
+        <h2 id={`post-${post.slug}`} className="text-lg font-semibold leading-snug group-hover:text-neutral-600 dark:group-hover:text-neutral-400 transition-colors duration-150">
           {post.title}
         </h2>
       </Link>
@@ -27,7 +27,7 @@ export function PostCard({
         {post.series && (
           <Link
             href={`/series/${encodeURIComponent(post.series)}`}
-            className="inline-flex items-center gap-1 max-w-[140px] sm:max-w-none truncate text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+            className="inline-flex items-center gap-1 max-w-[140px] sm:max-w-none truncate text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors duration-150"
           >
             <LuLayers size={12} className="shrink-0" />
             <span className="truncate">{post.series}</span>
@@ -45,7 +45,7 @@ export function PostCard({
             <Link
               key={tag}
               href={`/tags/${encodeURIComponent(tag)}`}
-              className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 inline-flex items-center gap-1"
+              className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 inline-flex items-center gap-1 transition-colors duration-150"
             >
               <LuTag size={10} />
               {tag}
@@ -55,7 +55,8 @@ export function PostCard({
       )}
       <Link
         href={`/blog/${post.slug}`}
-        className="mt-3 inline-flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+        className="mt-3 inline-flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors duration-150"
+        aria-label={`Read more about ${post.title}`}
       >
         Read more <LuChevronRight size={14} />
       </Link>

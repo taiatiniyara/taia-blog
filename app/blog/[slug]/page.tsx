@@ -114,7 +114,7 @@ export default async function PostPage({ params, searchParams }: Props) {
               <span aria-hidden="true">&middot;</span>
               <Link
                 href={`/series/${encodeURIComponent(post.series)}`}
-                className="inline-flex items-center gap-1 hover:text-neutral-900 dark:hover:text-neutral-100"
+                className="inline-flex items-center gap-1 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors duration-150"
               >
                 <LuLayers size={14} className="shrink-0" />
                 <span>{post.series}</span>
@@ -128,7 +128,7 @@ export default async function PostPage({ params, searchParams }: Props) {
               <Link
                 key={tag}
                 href={`/tags/${encodeURIComponent(tag)}`}
-                className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors duration-150"
               >
                 {tag}
               </Link>
@@ -168,7 +168,7 @@ export default async function PostPage({ params, searchParams }: Props) {
               <li key={p.slug}>
                 <Link
                   href={`/blog/${p.slug}`}
-                  className="text-sm text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 leading-snug line-clamp-2"
+                  className="text-sm text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 leading-snug line-clamp-2 transition-colors duration-150"
                 >
                   {p.title}
                 </Link>
@@ -205,14 +205,14 @@ async function SeriesNav({
         </span>
         <Link
           href={`/series/${encodeURIComponent(series)}`}
-          className="text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+          className="text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors duration-150"
         >
           View all &rarr;
         </Link>
       </div>
       <Link
         href={`/series/${encodeURIComponent(series)}`}
-        className="text-sm font-medium text-neutral-800 dark:text-neutral-200 hover:text-neutral-600 dark:hover:text-neutral-400"
+        className="text-sm font-medium text-neutral-800 dark:text-neutral-200 hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors duration-150"
       >
         {series}
       </Link>
@@ -224,7 +224,7 @@ async function SeriesNav({
           {previous ? (
             <Link
               href={`/blog/${previous.slug}`}
-              className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 max-w-[48%] truncate inline-flex items-center gap-1"
+              className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 max-w-[48%] truncate inline-flex items-center gap-1 transition-colors duration-150"
             >
               <LuChevronLeft size={14} className="shrink-0" /> {previous.title}
             </Link>

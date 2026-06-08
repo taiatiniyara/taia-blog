@@ -38,7 +38,7 @@ export function SubscribeForm() {
             required
             aria-label="Email address"
             placeholder="your@email.com"
-            className="w-full pl-8 pr-3 py-2 text-sm border rounded-lg bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 placeholder:text-neutral-400"
+            className="relative w-full pl-8 pr-3 py-2 text-sm border rounded-lg bg-white dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 placeholder:text-neutral-400 disabled:opacity-50"
           />
         </div>
         <button

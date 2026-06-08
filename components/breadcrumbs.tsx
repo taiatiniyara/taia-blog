@@ -54,20 +54,20 @@ export function Breadcrumbs() {
   if (crumbs.length <= 1) return null
 
   return (
-    <nav aria-label="Breadcrumb" className="mb-6 mx-auto max-w-5xl">
-      <ol className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400">
+    <nav aria-label="Breadcrumb" className="mb-6 mx-auto max-w-5xl overflow-x-auto">
+      <ol className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400 whitespace-nowrap min-w-0">
         {crumbs.map((crumb, i) => {
           const isLast = i === crumbs.length - 1
           return (
             <li key={crumb.href} className="flex items-center gap-1.5">
               {isLast ? (
-                <span className="text-neutral-900 dark:text-neutral-100">
+                <span className="text-neutral-900 dark:text-neutral-100 truncate max-w-[200px]">
                   {crumb.label}
                 </span>
               ) : (
                 <Link
                   href={crumb.href}
-                  className="hover:text-neutral-900 dark:hover:text-neutral-100"
+                  className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors duration-150"
                 >
                   {crumb.label}
                 </Link>

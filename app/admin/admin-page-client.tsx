@@ -132,8 +132,8 @@ export function AdminPageClient({
           </h1>
           <Link
             href="/admin"
-            onClick={() => setEditMode(false)}
-            className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+              onClick={() => setEditMode(false)}
+              className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors duration-150"
           >
             &larr; Back to list
           </Link>
@@ -149,7 +149,7 @@ export function AdminPageClient({
         <h1 className="text-2xl font-semibold">Dashboard</h1>
         <Link
           href="/admin?edit=new"
-          className="px-4 py-2 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200"
+          className="px-4 py-2 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors duration-150"
         >
           New Post
         </Link>
@@ -180,7 +180,7 @@ export function AdminPageClient({
                   className={`px-2.5 py-1 text-xs rounded-full border ${
                     statusFilter === s
                       ? "bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 border-neutral-900 dark:border-neutral-100"
-                      : "border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                      : "border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-150"
                   }`}
                 >
                   {s === "all" ? "All" : s === "published" ? "Published" : "Drafts"}
@@ -218,8 +218,8 @@ export function AdminPageClient({
                   <th className="py-2 pr-4 font-medium">
                     <button
                       type="button"
-                      onClick={() => handleSort("title")}
-                      className="hover:text-neutral-900 dark:hover:text-neutral-100"
+                       onClick={() => handleSort("title")}
+                       className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors duration-150"
                     >
                       Title
                       <SortIcon field="title" sortField={sortField} sortDir={sortDir} />
@@ -228,8 +228,8 @@ export function AdminPageClient({
                   <th className="py-2 pr-4 font-medium">
                     <button
                       type="button"
-                      onClick={() => handleSort("published")}
-                      className="hover:text-neutral-900 dark:hover:text-neutral-100"
+                       onClick={() => handleSort("published")}
+                       className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors duration-150"
                     >
                       Status
                       <SortIcon field="published" sortField={sortField} sortDir={sortDir} />
@@ -238,8 +238,8 @@ export function AdminPageClient({
                   <th className="py-2 pr-4 font-medium hidden sm:table-cell">
                     <button
                       type="button"
-                      onClick={() => handleSort("updatedAt")}
-                      className="hover:text-neutral-900 dark:hover:text-neutral-100"
+                       onClick={() => handleSort("updatedAt")}
+                       className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors duration-150"
                     >
                       Updated
                       <SortIcon field="updatedAt" sortField={sortField} sortDir={sortDir} />
@@ -253,7 +253,7 @@ export function AdminPageClient({
                     <td className="py-2 pr-4">
                       <Link
                         href={`/admin?edit=${post.slug}`}
-                        className="text-neutral-900 dark:text-neutral-100 hover:text-neutral-600 dark:hover:text-neutral-400"
+                        className="text-neutral-900 dark:text-neutral-100 hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors duration-150"
                       >
                         {post.title}
                       </Link>

@@ -31,8 +31,8 @@ export function PostNavigation({
             href={`/blog/${previous.slug}`}
             className="group text-xs sm:text-sm"
           >
-            <span className="text-neutral-400 dark:text-neutral-500 inline-flex items-center gap-1"><LuChevronLeft size={14} /> Older</span>
-            <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100 leading-snug">
+            <span className="text-neutral-400 dark:text-neutral-500 inline-flex items-center gap-1 transition-colors duration-150"><LuChevronLeft size={14} /> Older</span>
+            <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100 leading-snug transition-colors duration-150">
               <TruncatedTitle title={previous.title} />
             </span>
           </Link>
@@ -44,8 +44,8 @@ export function PostNavigation({
             href={`/blog/${next.slug}`}
             className="group text-xs sm:text-sm"
           >
-            <span className="text-neutral-400 dark:text-neutral-500 inline-flex items-center gap-1">Newer <LuChevronRight size={14} /></span>
-            <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100 leading-snug">
+            <span className="text-neutral-400 dark:text-neutral-500 inline-flex items-center gap-1 transition-colors duration-150">Newer <LuChevronRight size={14} /></span>
+            <span className="block text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-neutral-100 leading-snug transition-colors duration-150">
               <TruncatedTitle title={next.title} />
             </span>
           </Link>

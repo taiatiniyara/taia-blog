@@ -152,7 +152,7 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
             <button
               type="button"
               onClick={handleDelete}
-              className="px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg"
+              className="px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors duration-150"
             >
               Delete
             </button>
@@ -171,20 +171,20 @@ export function PostForm({ post, existingSeries }: { post?: PostData; existingSe
               const url = await getPreviewUrl(finalSlug)
               window.open(url, "_blank")
             }}
-            className="px-4 py-2 text-sm border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300"
+            className="px-4 py-2 text-sm border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-colors duration-150"
           >
             Preview
           </button>
           <button
             type="submit"
-            className="px-4 py-2 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200"
+            className="px-4 py-2 text-sm bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors duration-150"
           >
             {formId ? "Save" : "Save Draft"}
           </button>
           <button
             type="button"
             onClick={() => handleSave(true, true)}
-            className="px-4 py-2 text-sm bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-600"
+            className="px-4 py-2 text-sm bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors duration-150"
           >
             Publish
           </button>

@@ -18,6 +18,8 @@ export default async function TagPage({
   const { getPostsByTag } = await import("@/lib/posts")
   const posts = await getPostsByTag(tag, page)
   const hasMore = posts.length === 10
+  const { loadExcerpts } = await import("@/lib/posts")
+  const excerpts = await loadExcerpts(posts)
 
   const decodedTag = decodeURIComponent(tag)
 
@@ -28,13 +30,13 @@ export default async function TagPage({
           Posts tagged &ldquo;{decodedTag}&rdquo;
         </h1>
         {posts.length === 0 ? (
-          <div className="py-12 text-center text-neutral-500 dark:text-neutral-400">
+          <div className="py-12 text-center text-neutral-500 dark:text-neutral-400 text-sm">
             No posts yet.
           </div>
         ) : (
           <div>
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <PostCard key={post.id} post={post} excerpt={excerpts.get(post.slug) ?? undefined} />
             ))}
           </div>
         )}
@@ -42,7 +44,7 @@ export default async function TagPage({
           <div className="mt-8 text-center">
             <Link
               href={`/tags/${encodeURIComponent(tag)}?page=${page + 1}`}
-              className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 inline-flex items-center gap-1"
+              className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 inline-flex items-center gap-1 transition-colors duration-150"
             >
               Older Posts <LuChevronRight size={14} />
             </Link>
