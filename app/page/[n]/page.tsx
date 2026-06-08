@@ -25,7 +25,7 @@ export default async function PaginatedPage({
   if (posts.length === 0 && page > pages) notFound()
 
   return (
-    <PageWrapper>
+    <PageWrapper className="max-w-4xl">
       <h2 className="text-sm font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wide mb-6">
         Page {page}
       </h2>

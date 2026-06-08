@@ -19,7 +19,7 @@ export default async function HomePage({
   const cardData = await loadExcerpts(posts)
 
   return (
-    <PageWrapper>
+    <PageWrapper className="max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div />
         <div className="flex items-center gap-1 text-xs sm:text-sm">
